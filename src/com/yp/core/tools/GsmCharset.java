@@ -28,6 +28,7 @@ package com.yp.core.tools;
 */
 //package com.kunilkuda; //< Replace with your package 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * * \brief Provides services to translate ASCII (ISO-8859-1 / Latin 1) charset
@@ -35,12 +36,13 @@ import java.util.ArrayList;
  */
 public class GsmCharset {
 	/** * \brief Escape byte for the extended ISO */
-	private final Short ESC_BYTE = new Short((short) 27);
+	private static final Short ESC_BYTE = (short) 27;
 	/**
 	 * * \brief ISO-8859-1 - GSM 03.38 character map * * Taken from
 	 * http://www.dreamfabric.com/sms/default_alphabet.html
 	 */
-	private final short[] isoGsmMap = { // Index = GSM, { ISO }
+	// Index = GSM, { ISO }
+	private final short[] isoGsmMap = { 
 			64, 163, 36, 165, 232, 233, 249, 236, 242, 199, 10, 216, 248, 13, 197, 229, 0, 95, 0, 0, 0, 0, 0, 0, 0, 0,
 			0, 0, 198, 230, 223, 201, 32, 33, 34, 35, 164, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51,
 			52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 161, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78,
@@ -51,7 +53,8 @@ public class GsmCharset {
 	 * * \brief Extended ISO-8859-1 - GSM 03.38 character map * * Taken from
 	 * http://www.dreamfabric.com/sms/default_alphabet.html
 	 */
-	private final short[][] extIsoGsmMap = { // { {Ext GSM,ISO} }
+	// { {Ext GSM,ISO} }
+	private final short[][] extIsoGsmMap = { 
 			{ 10, 12 }, { 20, 94 }, { 40, 123 }, { 41, 125 }, { 47, 92 }, { 60, 91 }, { 61, 126 }, { 62, 93 },
 			{ 64, 124 }, { 101, 164 } };
 
@@ -62,7 +65,7 @@ public class GsmCharset {
 	 */
 	public byte[] translateToGsm0338(String dataIso) {
 		byte[] dataIsoBytes = dataIso.getBytes();
-		ArrayList dataGsm = new ArrayList();
+		List<Short> dataGsm = new ArrayList<>();
 		for (int dataIndex = 0; dataIndex < dataIsoBytes.length; dataIndex++) {
 			byte currentDataIso = dataIsoBytes[dataIndex];
 			// Search currentDataGsm in the isoGsmMap
@@ -76,9 +79,9 @@ public class GsmCharset {
 					dataGsm.add(ESC_BYTE);
 				}
 			}
-			dataGsm.add(new Short(currentDataGsm));
+			dataGsm.add(currentDataGsm);
 		}
-		Short[] dataGsmShortArray = (Short[]) dataGsm.toArray(new Short[0]);
+		Short[] dataGsmShortArray =  dataGsm.toArray(new Short[0]);
 		return translateShortToByteArray(dataGsmShortArray);
 	}
 
@@ -87,7 +90,7 @@ public class GsmCharset {
 	 * \param dataGsm Data in GSM 03.38 charset * \return ISO-8859-1 string
 	 */
 	public String translateToIso(byte[] dataGsm) {
-		ArrayList dataIso = new ArrayList();
+		List<Short> dataIso = new ArrayList<>();
 		boolean isEscape = false;
 		for (int dataIndex = 0; dataIndex < dataGsm.length; dataIndex++) { // Convert to short to avoid negative values
 			short currentDataGsm = (short) dataGsm[dataIndex];
@@ -96,14 +99,14 @@ public class GsmCharset {
 				isEscape = true;
 			} else if (!isEscape) {
 				currentDataIso = findIsoChar(currentDataGsm);
-				dataIso.add(new Short(currentDataIso));
+				dataIso.add(currentDataIso);
 			} else {
 				currentDataIso = findExtIsoChar(currentDataGsm);
-				dataIso.add(new Short(currentDataIso));
+				dataIso.add(currentDataIso);
 				isEscape = false;
 			}
 		}
-		Short[] dataIsoShortArray = (Short[]) dataIso.toArray(new Short[0]);
+		Short[] dataIsoShortArray = dataIso.toArray(new Short[0]);
 		byte[] dataIsoByteArray = translateShortToByteArray(dataIsoShortArray);
 		return new String(dataIsoByteArray);
 	}
