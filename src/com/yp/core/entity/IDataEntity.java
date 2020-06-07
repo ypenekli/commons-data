@@ -2,17 +2,10 @@ package com.yp.core.entity;
 
 import java.io.Serializable;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Date;
 import java.util.Map;
 
 public interface IDataEntity extends Serializable {
-
-	static final byte INSERTED = 0;
-	static final byte DELETED = 1;
-	static final byte UPDATED = 2;
-	static final byte UNCHANGED = 3;
-	static final byte EMPTY = 4;
 
 	String getSchemaName();
 
@@ -65,12 +58,12 @@ public interface IDataEntity extends Serializable {
 	boolean isPrimaryKey(String pFieldName);
 
 	boolean isNull(String pFieldName);
-	
+
 	String getClassName();
 
 	void load(String[] pFieldNames, Object[] pValues);
 
-	void load(String[] pFieldNames, ResultSet pRs) throws SQLException;
+	void load(String[] pFieldNames, ResultSet pRs);
 
 	IDataEntity load(IDataEntity pDe);
 

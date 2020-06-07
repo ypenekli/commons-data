@@ -29,8 +29,8 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 
@@ -405,7 +405,7 @@ public abstract class AModel<T> {
 			}
 
 		} catch (IllegalAccessException | InstantiationException | IllegalArgumentException | InvocationTargetException
-				| NoSuchMethodException | SecurityException | IOException | InvalidFormatException e) {
+				| NoSuchMethodException | SecurityException | IOException e) {
 			Logger.getLogger(MyLogger.NAME).log(Level.SEVERE, e.getMessage(), e);
 		}
 
@@ -459,7 +459,7 @@ public abstract class AModel<T> {
 			Cell cell = row.getCell(dI);
 			if (cell == null)
 				values[dI] = null;
-			else if (cell.getCellType() == Cell.CELL_TYPE_NUMERIC)
+			else if (cell.getCellType() == CellType.NUMERIC)
 				values[dI] = cell.getNumericCellValue();
 			else
 				values[dI] = cell.getStringCellValue();
@@ -510,7 +510,7 @@ public abstract class AModel<T> {
 		try (FileInputStream file = new FileInputStream(new File(pInputFilePath))) {
 			org.apache.poi.ss.usermodel.Workbook dWb = WorkbookFactory.create(file);
 			dListe = readFromExcelWorkbook(dWb, pSheetName, pCollNames, pHasCollNames, pClass);
-		} catch (IOException | InvalidFormatException e) {
+		} catch (IOException e) {
 			Logger.getLogger(MyLogger.NAME).log(Level.SEVERE, e.getMessage(), e);
 		}
 		return dListe;

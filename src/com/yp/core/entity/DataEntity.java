@@ -26,6 +26,13 @@ import javafx.beans.property.SimpleStringProperty;
 
 public class DataEntity implements IDataEntity {
 
+	public static final byte INSERTED = 0;
+	public static final byte DELETED = 1;
+	public static final byte UPDATED = 2;
+	public static final byte UNCHANGED = 3;
+	public static final byte EMPTY = 4;
+	
+	
 	private static final long serialVersionUID = 5340694004093419660L;
 	protected Map<String, IElement> fields;
 	private Map<String, IElement> primaryKeys;
@@ -276,11 +283,16 @@ public class DataEntity implements IDataEntity {
 	}
 
 	@Override
-	public void load(String[] pFieldNames, ResultSet pRs) throws SQLException {
+	public void load(String[] pFieldNames, ResultSet pRs) {
 		int i = 1;
 		for (String key : pFieldNames) {
 			key = key.toLowerCase(Locale.US);
-			setField(key, pRs.getObject(i++), false);
+			try {
+				setField(key, pRs.getObject(i++), false);
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 

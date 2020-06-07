@@ -35,9 +35,9 @@ public class BaseConstants {
 	private BaseConstants() {
 	}
 
-	private static final String config_url;
-	private static final ResourceBundle bundleSql;
-	public static final ResourceBundle BUNDLE_MESSAGE;
+	private static final String config_url = "/core/config/Config.properties";
+	private static final ResourceBundle bundleSql = ResourceBundle.getBundle("core.config.Queries");
+	public static final ResourceBundle BUNDLE_MESSAGE = ResourceBundle.getBundle("core.config.Messages");
 
 	public static final String ERRORCODE_CONNECTION = "10000";
 	public static final String ERRORCODE_NO_USER = "10001";
@@ -90,10 +90,10 @@ public class BaseConstants {
 	public static final String PARENTHESIS_CLOSE = ")";
 	public static final String TRUE = "true";
 	public static final String FALSE = "false";
-	public static final IReference<String> CONFIRMATION_WAITING;
-	public static final IReference<String> CONFIRMATION_OK;
-	public static final IReference<String> ENABLED;
-	public static final IReference<String> DISABLED;
+	// public static final IReference<String> CONFIRMATION_WAITING;
+	// public static final IReference<String> CONFIRMATION_OK;
+//	public static final IReference<String> ENABLED;
+//	public static final IReference<String> DISABLED;
 	public static final BigDecimal BIGDECIMAL_MINUS_ONE;
 	public static final BigDecimal BIGDECIMAL_TWO;
 	public static final BigDecimal BIGDECIMAL_THREE;
@@ -124,9 +124,9 @@ public class BaseConstants {
 	private static String rootAddress;
 
 	static {
-		config_url = "/core/references/Config.properties";
-		bundleSql = ResourceBundle.getBundle("base.references.Queries");
-		BUNDLE_MESSAGE = ResourceBundle.getBundle("base.references.Messages");
+		// config_url = "/core/config/Config.properties";
+		// bundleSql = ResourceBundle.getBundle("core.config.Queries");
+		// BUNDLE_MESSAGE = ResourceBundle.getBundle("core.config.Messages");
 		MESSAGE_SAVE_SUCCEEDED = getString("1015");
 		MESSAGE_ADD_SUCCEEDED = getString("Add.Succeded");
 		MESSAGE_ADD_ROLE_SUCCEEDED = getString("Add.Role.Succeded");
@@ -150,10 +150,10 @@ public class BaseConstants {
 		SLASH_OS = System.getProperty("file.separator");
 		EOL_OS = System.getProperty("line.separator");
 		USER_DIR = System.getProperty("user.dir");
-		CONFIRMATION_WAITING = new Reference<>("B", getString("1030"));
-		CONFIRMATION_OK = new Reference<>("O", getString("1031"));
-		ENABLED = new Reference<>("A", getString("1028"));
-		DISABLED = new Reference<>("K", getString("1029"));
+//		CONFIRMATION_WAITING = new Reference<>("B", getString("1030"));
+//		CONFIRMATION_OK = new Reference<>("O", getString("1031"));
+//		ENABLED = new Reference<>("A", getString("1028"));
+//		DISABLED = new Reference<>("K", getString("1029"));
 		BIGDECIMAL_MINUS_ONE = new BigDecimal(-1);
 		BIGDECIMAL_TWO = new BigDecimal(2);
 		BIGDECIMAL_THREE = new BigDecimal(3);
@@ -287,7 +287,7 @@ public class BaseConstants {
 				BaseConstants.rootAddress = decodeUrlAsUTF8(new File(location.getFile()).getParent());
 			} else {
 				final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-				final URL location2 = classLoader.getResource("base/references/Config.properties");
+				final URL location2 = classLoader.getResource("core/config/Config.properties");
 				if (location2 != null) {
 					BaseConstants.rootAddress = decodeUrlAsUTF8(
 							new File(location2.getFile()).getParentFile().getParentFile().getParent());
