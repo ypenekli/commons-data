@@ -37,7 +37,7 @@ import org.apache.poi.ss.usermodel.WorkbookFactory;
 import com.yp.core.db.DbCommand;
 import com.yp.core.db.DbConninfo;
 import com.yp.core.db.DbHandler;
-import com.yp.core.db.IExport;
+import com.yp.core.db.ITransfer;
 import com.yp.core.db.OnExportListener;
 import com.yp.core.entity.EntityFactory;
 import com.yp.core.entity.IDataEntity;
@@ -354,16 +354,16 @@ public abstract class AModel<T> {
 		return handler.saveAtomic(pParams);
 	}
 
-	public IResult<IExport> exportDb(DbConninfo pTarget, IExport pTransfer, OnExportListener proceedListener) {
-		return handler.exportDb(pTarget, pTransfer, proceedListener);
-	}
-
 	public List<IDataEntity> findDbTables(String pLibrary, String pSchema) {
 		return handler.findDbTables(pLibrary, pSchema);
 	}
 
-	public IResult<AXlsAktar> exportToXls(final DbCommand pQuery, Type pOutType, AXlsAktar pXls) {
-		return handler.exportToXls(pQuery, pOutType, pXls);
+	public IResult<ITransfer> transferDb(DbConninfo pTarget, ITransfer pTransfer, OnExportListener proceedListener) {
+		return handler.transferDb(pTarget, pTransfer, proceedListener);
+	}
+
+	public IResult<AXlsAktar> transferToXls(final DbCommand pQuery, Type pOutType, AXlsAktar pXls) {
+		return handler.transferToXls(pQuery, pOutType, pXls);
 	}
 
 	public IResult<AXlsAktar> transferToXls(List<? extends IDataEntity> pList, AXlsAktar pXls) {

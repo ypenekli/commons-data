@@ -5,15 +5,13 @@ import java.util.List;
 
 import com.yp.core.db.DbCommand;
 import com.yp.core.db.DbConninfo;
-import com.yp.core.db.IExport;
+import com.yp.core.db.ITransfer;
 import com.yp.core.db.OnExportListener;
 import com.yp.core.entity.IDataEntity;
 import com.yp.core.entity.IResult;
 import com.yp.core.excel.AXlsAktar;
 
-public interface IHandler<T> {
-
-	IResult<AXlsAktar> exportToXls(final DbCommand pQuery, final Type pOutType, final AXlsAktar pXls);
+public interface IHandler<T> {	
 
 	T find(T pDataEntity);
 
@@ -40,7 +38,9 @@ public interface IHandler<T> {
 	IResult<String> sendMail(FnParam... pParams);
 
 	List<IDataEntity> findDbTables(String pLibrary, String pSchema);
+	
+	IResult<AXlsAktar> transferToXls(DbCommand pQuery, Type pOutType, AXlsAktar pXls);
 
-	IResult<IExport> exportDb(DbConninfo pTarget, IExport pTransfer, OnExportListener proceedListener);
+	IResult<ITransfer> transferDb(DbConninfo pTarget, ITransfer pTransfer, OnExportListener proceedListener);
 
 }

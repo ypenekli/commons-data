@@ -13,58 +13,58 @@ import com.yp.core.db.OnExportListener.PHASE;
 import com.yp.core.entity.IResult;
 import com.yp.core.tools.DateTime;
 
-public class DbExport {
+public class DbTransfer {
 
-	private ConcurrentHashMap<String, FutureTask<IResult<IExport>>> exports;
+	private ConcurrentHashMap<String, FutureTask<IResult<ITransfer>>> tranfers;
 	private ExecutorService executor;
 	private int taskCount;
 
-	public DbExport(int pTaskCount) {
+	public DbTransfer(int pTaskCount) {
 		super();
 		taskCount = pTaskCount;
-		exports = new ConcurrentHashMap<>(taskCount);
+		tranfers = new ConcurrentHashMap<>(taskCount);
 		executor = Executors.newFixedThreadPool(taskCount);
 	}
 
 	private static final String FORMATED_EXPORT_MESSAGE1 = "TABLO TOPLAMI/TAMAMLANAN :%s/%s, %s";
 
-	public void export(DbConninfo pTarget, IExport pExport, OnExportListener proceedListener) {
-		if (pExport != null) {
-			FutureTask<IResult<IExport>> task = new FutureTask<>(new Callable<IResult<IExport>>() {
+	public void transfer(DbConninfo pTarget, ITransfer pTransfer, OnExportListener proceedListener) {
+		if (pTransfer != null) {
+			FutureTask<IResult<ITransfer>> task = new FutureTask<>(new Callable<IResult<ITransfer>>() {
 				@Override
-				public IResult<IExport> call() throws Exception {
-					return new AModel<IExport>() {
-					}.exportDb(pTarget, pExport, proceedListener);
+				public IResult<ITransfer> call() throws Exception {
+					return new AModel<ITransfer>() {
+					}.transferDb(pTarget, pTransfer, proceedListener);
 				}
 			});
 
-			exports.put(pExport.getExportId(), task);
+			tranfers.put(pTransfer.getTransferId(), task);
 			executor.execute(task);
 			while (true) {
 				try {
 					if (task.isDone()) {
-						IResult<IExport> res = task.get();
-						pExport.setMessages(res.getMessage());
-						pExport.setEndTime(DateTime.dbNow());
-						exports.remove(pExport.getExportId());
-						int remaining = exports.size();
+						IResult<ITransfer> res = task.get();
+						pTransfer.setMessages(res.getMessage());
+						pTransfer.setEndTime(DateTime.dbNow());
+						tranfers.remove(pTransfer.getTransferId());
+						int remaining = tranfers.size();
 						proceedListener.onProceed(PHASE.ENDS_ALL, (double) remaining, taskCount, String
 								.format(FORMATED_EXPORT_MESSAGE1, taskCount, taskCount - remaining, res.getMessage()));
 						return;
 					}
 					if (task.isCancelled()) {
-						IResult<IExport> res = task.get();
-						pExport.setMessages(res.getMessage());
-						exports.remove(pExport.getExportId());
-						int remaining = exports.size();
+						IResult<ITransfer> res = task.get();
+						pTransfer.setMessages(res.getMessage());
+						tranfers.remove(pTransfer.getTransferId());
+						int remaining = tranfers.size();
 						proceedListener.onProceed(PHASE.FAILS_ALL, (double) remaining, taskCount, String
 								.format(FORMATED_EXPORT_MESSAGE1, taskCount, taskCount - remaining, res.getMessage()));
 
 					}
 				} catch (Exception e) {
-					pExport.setMessages(e.getMessage());
-					exports.remove(pExport.getExportId());
-					int remaining = exports.size();
+					pTransfer.setMessages(e.getMessage());
+					tranfers.remove(pTransfer.getTransferId());
+					int remaining = tranfers.size();
 					proceedListener.onProceed(PHASE.FAILS_ALL, (double) remaining, taskCount,
 							String.format(FORMATED_EXPORT_MESSAGE1, taskCount, taskCount - remaining, e.getMessage()));
 				}
@@ -72,9 +72,9 @@ public class DbExport {
 		}
 	}
 
-	public void cancelExport(List<IExport> list) {
+	public void cancelExport(List<ITransfer> list) {
 		if (!BaseConstants.isEmpty(list)) {
-			list.forEach(e -> exports.get(e.getExportId()).cancel(true));
+			list.forEach(e -> tranfers.get(e.getTransferId()).cancel(true));
 		}
 	}
 }

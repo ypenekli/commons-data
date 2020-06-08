@@ -2,8 +2,8 @@ package com.yp.core.db;
 
 import java.math.BigDecimal;
 
-public interface IExport {
-	String getExportId();
+public interface ITransfer {
+	String getTransferId();
 	
 	String getSourceSchema();
 	String getSourceTable();
