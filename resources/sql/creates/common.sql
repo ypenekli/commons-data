@@ -8,29 +8,31 @@ create table common.projects(
 	icon varchar(30) default '',
 	status char not null default 'A',
 	autor varchar(50) default '',	
+	organization varchar(50) default '',
+	version varchar(50) default '1.0.0',
+	version_update_date numeric(8, 0),	
 	
 	owner varchar(50),
 	remaddress varchar(50),
 	datetime numeric(17,0),
-	lastowner varchar(50),
-	lastremaddress varchar(50),
-	lastdatetime numeric(17,0),
+	last_owner varchar(50),
+	last_remaddress varchar(50),
+	last_datetime numeric(17,0),
 	constraint pk_common_projects primary key  
-(
-	id 
-)
+	(
+		id 
+	)
 );
 drop table common.project_subfuncs;
 create table common.project_subfuncs(
 	id varchar(50) not null,	
-	projectid varchar(50) not null,		
+	project_id varchar(50) not null,		
 	name varchar(150) not null,
 	description varchar(150) default '',
 	url varchar(50) default '',
-	target varchar(50) default '',    
-    autor varchar(50) default '',
+	target varchar(50) default '',  
 	
-    parentid integer not null default -1,
+    parent_id integer not null default -1,
 	idx int not null default 0,
     level int not null default 0,
     hierarchy varchar(250),
@@ -41,19 +43,19 @@ create table common.project_subfuncs(
 	owner varchar(50),
 	remaddress varchar(50),
 	datetime numeric(17,0),
-	lastowner varchar(50),
-	lastremaddress varchar(50),
-	lastdatetime numeric(17,0),
+	last_owner varchar(50),
+	last_remaddress varchar(50),
+	last_datetime numeric(17,0),
 	constraint pk_common_project_subfuncs primary key  
-(
-	id 
-)
+	(
+		id 
+	)
 );
 drop table common.groups;
 create table common.groups(
 	id integer not null,
 	name varchar(150) not null,
-	projectid varchar(50) not null,		
+	project_id varchar(50) not null,		
 	hierarchy varchar(150),
 	group_type char not null default 'U',
 	status char not null default 'A',	
@@ -61,83 +63,84 @@ create table common.groups(
 	owner varchar(50),
 	remaddress varchar(50),
 	datetime numeric(17,0),
-	lastowner varchar(50),
-	lastremaddress varchar(50),
-	lastdatetime numeric(17,0),
+	last_owner varchar(50),
+	last_remaddress varchar(50),
+	last_datetime numeric(17,0),
 	constraint pk_common_groups primary key  
-(
-	id 
-)
+	(
+		id 
+	)
 );
 drop table common.group_funcs;
 create table common.group_funcs(
-	groupid integer not null,
-	funcid varchar(150) not null,	
+	group_id integer not null,
+	func_id varchar(150) not null,	
 	
 	owner varchar(50),
 	remaddress varchar(50),
 	datetime numeric(17,0),
-	lastowner varchar(50),
-	lastremaddress varchar(50),
-	lastdatetime numeric(17,0),
+	last_owner varchar(50),
+	last_remaddress varchar(50),
+	last_datetime numeric(17,0),
 	constraint pk_common_group_funcs primary key  
-(
-	groupid, funcid 
-)
+	(
+		group_id, func_id 
+	)
 );
 drop table common.group_funcs_history;
 create table common.group_funcs_history(
 	idx bigint not null,
-	groupid integer not null,
-	funcid varchar(150) not null,	
+	group_id integer not null,
+	func_id varchar(150) not null,
 	
-	update_userid integer,
-	update_username varchar(100),
-	update_usertitle varchar(50),
+	update_user_id integer,
+	update_user_name varchar(100),
+	update_user_title varchar(50),
 	update_mode char not null default 'A',
 	
 	owner varchar(50),
 	remaddress varchar(50),
 	datetime numeric(17,0),
 	constraint pk_common_group_funcs_history primary key  
-(
-	idx 
-)
+	(
+		idx 
+	)
 );
 drop table common.group_users;
 create table common.group_users(
-	groupid integer not null,
-	userid integer not null,
+	group_id integer not null,
+	user_id integer not null,
 	
 	owner varchar(50),
 	remaddress varchar(50),
 	datetime numeric(17,0),
-	lastowner varchar(50),
-	lastremaddress varchar(50),
-	lastdatetime numeric(17,0),
+	last_owner varchar(50),
+	last_remaddress varchar(50),
+	last_datetime numeric(17,0),
 	constraint pk_common_group_users primary key  
-(
-	groupid, userid 
-)
+	(
+		group_id, user_id 
+	)
 );
 drop table common.group_users_history;
 create table common.group_users_history(
 	idx bigint not null,
-	groupid integer not null,
-	userid integer not null,
+	group_id integer not null,
+	user_id integer not null,
 	
-	update_userid integer,
-	update_username varchar(100),
-	update_usertitle varchar(50),
+	update_datetime numeric(17, 0),	
+	update_user_id integer,
+	update_user_name varchar(100),
+	update_user_title varchar(50),
 	update_mode char not null default 'A',
 	
 	owner varchar(50),
 	remaddress varchar(50),
 	datetime numeric(17,0),
 	constraint pk_common_group_users_history primary key  
-(
-	idx 
-)
+	(
+		idx 
+	)
 );
 drop table common.users;
 create table common.users(
@@ -174,64 +177,64 @@ create table common.users(
 	owner varchar(50),
 	remaddress varchar(50),
 	datetime numeric(17,0),
-	lastowner varchar(50),
-	lastremaddress varchar(50),
-	lastdatetime numeric(17,0),
+	last_owner varchar(50),
+	last_remaddress varchar(50),
+	last_datetime numeric(17,0),
 	constraint pk_common_users primary key  
-(
-	id 
-)
+	(
+		id 
+	)
 );
 drop table common.user_images;
 create table common.user_images(
-	userid integer not null,
+	user_id integer not null,
 	idx integer not null,
 	image blob not null,	
 	
 	owner varchar(50),
 	remaddress varchar(50),
 	datetime numeric(17,0),
-	lastowner varchar(50),
-	lastremaddress varchar(50),
-	lastdatetime numeric(17,0),
+	last_owner varchar(50),
+	last_remaddress varchar(50),
+	last_datetime numeric(17,0),
 	constraint pk_common_user_images primary key  
-(
-	userid, idx 
-)
+	(
+		user_id, idx 
+	)
 );
 drop table common.login_history;
 create table common.login_history(
 	idx bigint not null,
-	projectid integer not null,
-	userid integer not null,
+	project_id integer not null,
+	user_id integer not null,
 	login_datetime numeric(17, 0),
 	
 	owner varchar(50),
 	remaddress varchar(50),
 	datetime numeric(17,0),
 	constraint pk_common_login_history primary key  
-(
-	idx 
-)
+	(
+		idx 
+	)
 );
-drop table common.pwdu_history;
-create table common.pwdu_history(
+drop table common.pwd_history;
+create table common.pwd_history(
 	idx bigint not null,
-	userid integer not null,
+	user_id integer not null,
 	password varchar(50) not null default '',
 	
-	update_datetime numeric(17, 0),
-	update_userid integer,
-	update_username varchar(100),
-	update_usertitle varchar(50),
+	update_datetime numeric(17, 0),	
+	update_user_id integer,
+	update_user_name varchar(100),
+	update_user_title varchar(50),
 	
 	owner varchar(50),
 	remaddress varchar(50),
 	datetime numeric(17,0),
-	constraint pk_common_pwdu_history primary key  
-(
-	idx 
-)
+	constraint pk_common_pwd_history primary key  
+	(
+		idx 
+	)
 );
 drop table common.commons;
 create table common.commons(
@@ -241,7 +244,7 @@ create table common.commons(
 	description varchar(150) default '', 	
 	group_code integer not null default -1,	
 	
-    parentid integer not null default -1,
+    parent_id integer not null default -1,
 	idx int not null default 0,
     level int not null default 0,
     hierarchy varchar(150),
@@ -252,9 +255,9 @@ create table common.commons(
 	owner varchar(50),
 	remaddress varchar(50),
 	datetime numeric(17,0),
-	lastowner varchar(50),
-	lastremaddress varchar(50),
-	lastdatetime numeric(17,0),
+	last_owner varchar(50),
+	last_remaddress varchar(50),
+	last_datetime numeric(17,0),
 	constraint pk_common_commons primary key  
 	(
 		id 
