@@ -29,7 +29,7 @@ import com.yp.core.FnParam;
 import com.yp.core.IHandler;
 import com.yp.core.db.DbCommand;
 import com.yp.core.db.DbConninfo;
-import com.yp.core.db.IExport;
+import com.yp.core.db.ITransfer;
 import com.yp.core.db.OnExportListener;
 import com.yp.core.entity.DataEntity;
 import com.yp.core.entity.IDataEntity;
@@ -683,7 +683,7 @@ public class JsonHandler<T> implements IHandler<T> {
 	}
 
 	@Override
-	public IResult<AXlsAktar> exportToXls(DbCommand pQuery, Type pOutType, AXlsAktar pXls) {
+	public IResult<AXlsAktar> transferToXls(DbCommand pQuery, Type pOutType, AXlsAktar pXls) {
 		IResult<AXlsAktar> res = new Result<>();
 		List<IDataEntity> list = findAny(pQuery, pOutType);
 		if (!BaseConstants.isEmpty(list)) {
@@ -758,7 +758,7 @@ public class JsonHandler<T> implements IHandler<T> {
 	}
 
 	@Override
-	public IResult<IExport> exportDb(DbConninfo pTarget, IExport pTransfer, OnExportListener proceedListener) {
+	public IResult<ITransfer> transferDb(DbConninfo pTarget, ITransfer pTransfer, OnExportListener proceedListener) {
 		return null;
 	}
 }

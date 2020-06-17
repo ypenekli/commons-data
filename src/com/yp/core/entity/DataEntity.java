@@ -6,7 +6,6 @@ import java.sql.Clob;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.Format;
-import java.time.LocalDate;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
@@ -15,14 +14,13 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.yp.core.log.MyLogger;
-import com.yp.core.ref.IReference;
 import com.yp.core.tools.DateTime;
 
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
+//import javafx.beans.property.SimpleBooleanProperty;
+//import javafx.beans.property.SimpleDoubleProperty;
+//import javafx.beans.property.SimpleIntegerProperty;
+//import javafx.beans.property.SimpleObjectProperty;
+//import javafx.beans.property.SimpleStringProperty;
 
 public class DataEntity implements IDataEntity {
 
@@ -31,8 +29,7 @@ public class DataEntity implements IDataEntity {
 	public static final byte UPDATED = 2;
 	public static final byte UNCHANGED = 3;
 	public static final byte EMPTY = 4;
-	
-	
+
 	private static final long serialVersionUID = 5340694004093419660L;
 	protected Map<String, IElement> fields;
 	private Map<String, IElement> primaryKeys;
@@ -331,7 +328,7 @@ public class DataEntity implements IDataEntity {
 	public void checkDouble(String pFieldName) {
 		Object temp = get(pFieldName);
 		if (temp != null && !(temp instanceof Double))
-			setField(pFieldName, new Double(temp.toString()), false);
+			setField(pFieldName, Double.parseDouble(temp.toString()), false);
 	}
 
 	public void checkString(String pFieldName, Format pFormat) {
@@ -512,214 +509,213 @@ public class DataEntity implements IDataEntity {
 		return pValue;
 	}
 
-	public class BooleanProperty extends SimpleBooleanProperty {
-
-		private String dAlanAdi;
-		private Object dTrueDeger = Boolean.TRUE;
-		private Object dFalseDeger = Boolean.FALSE;
-
-		public BooleanProperty(String pAlanAdi, Boolean pBoolean) {
-			super(pBoolean);
-			dAlanAdi = pAlanAdi;
-		}
-
-		public BooleanProperty(String pAlanAdi, Boolean pBoolean, final Object pTrueDeger, final Object pFalseDeger) {
-			super(pBoolean);
-			dAlanAdi = pAlanAdi;
-			dTrueDeger = pTrueDeger;
-			dFalseDeger = pFalseDeger;
-		}
-
-		@Override
-		public void set(boolean pBoolean) {
-			super.set(pBoolean);
-			Object dDeger = pBoolean ? dTrueDeger : dFalseDeger;
-			// if (!dDeger.equals(get(dAlanAdi)))
-			DataEntity.this.set(dAlanAdi, dDeger);
-		}
-
-		public Object getTrueDeger() {
-			return dTrueDeger;
-		}
-
-		public Object getFalseDeger() {
-			return dFalseDeger;
-		}
-
-	}
-
-	public class StringProperty extends SimpleStringProperty {
-
-		private String dAlanAdi;
-		private boolean dDegisti;
-		private CheckString checkString;
-
-		public StringProperty(String pAlanAdi, String pDeger) {
-			super(pDeger);
-			dAlanAdi = pAlanAdi;
-			dDegisti = true;
-		}
-
-		public StringProperty(String pAlanAdi, String pDeger, CheckString pCheckString) {
-			this(pAlanAdi, pDeger);
-			checkString = pCheckString;
-		}
-
-		public StringProperty(String pAlanAdi, String pDeger, boolean pDegisti) {
-			this(pAlanAdi, pDeger);
-			dDegisti = pDegisti;
-		}
-
-		@Override
-		public void set(String pValue) {
-			String value = checkString != null ? checkString.getChecked(pValue) : pValue;
-			super.set(value);
-			setField(dAlanAdi, value, dDegisti);
-		}
-
-	}
-
-	public interface CheckString {
-		String getChecked(String pValue);
-	}
-
-	public class DoubleProperty extends SimpleDoubleProperty {
-
-		private String dAlanAdi;
-		private Double dBosDeger;
-		private boolean dChanged;
-
-		public DoubleProperty(String pAlanAdi, Double pSayi, Double pBosDeger, boolean pChanged) {
-			super();
-			dAlanAdi = pAlanAdi;
-			dBosDeger = pBosDeger;
-			dChanged = pChanged;
-			setValue(pSayi);
-		}
-
-		public DoubleProperty(String pAlanAdi, Double pSayi, Double pBosDeger) {
-			this(pAlanAdi, pSayi, pBosDeger, true);
-		}
-
-		@Override
-		public void setValue(Number pSayi) {
-			if (pSayi == null)
-				pSayi = dBosDeger;
-			set(pSayi.doubleValue());
-		}
-
-		@Override
-		public void set(double pSayi) {
-			super.set(pSayi);
-			setField(dAlanAdi, pSayi, dChanged);
-		}
-	}
-
-	public class BigDecimalProperty extends SimpleDoubleProperty {
-
-		private String dAlanAdi;
-		private BigDecimal dBosDeger;
-
-		public BigDecimalProperty(String pAlanAdi, BigDecimal pSayi, BigDecimal pBosDeger) {
-			super();
-			dAlanAdi = pAlanAdi;
-			dBosDeger = pBosDeger;
-			setValue(pSayi);
-		}
-
-		@Override
-		public void setValue(Number pSayi) {
-			if (pSayi == null)
-				pSayi = dBosDeger;
-			set(pSayi.doubleValue());
-		}
-
-		@Override
-		public void set(double pSayi) {
-			super.set(pSayi);
-			setField(dAlanAdi, new BigDecimal(pSayi), true);
-		}
-	}
-
-	public class IntegerProperty extends SimpleIntegerProperty {
-
-		private String dAlanAdi;
-		private boolean dDegisti;
-		private Integer dBosDeger;
-
-		public IntegerProperty(String pAlanAdi, Integer pSayi, Integer pBosDeger, boolean pDegisti) {
-			super();
-			dAlanAdi = pAlanAdi;
-			dDegisti = pDegisti;
-			dBosDeger = pBosDeger;
-			setValue(pSayi);
-		}
-
-		public IntegerProperty(String pAlanAdi, Integer pSayi, Integer pBosDeger) {
-			this(pAlanAdi, pSayi, pBosDeger, true);
-		}
-
-		@Override
-		public void setValue(Number pSayi) {
-			if (pSayi == null)
-				pSayi = dBosDeger;
-			set(pSayi.intValue());
-		}
-
-		@Override
-		public void set(int pSayi) {
-			super.set(pSayi);
-			setField(dAlanAdi, pSayi, dDegisti);
-		}
-
-	}
-
-	public class TarihProperty extends SimpleObjectProperty<LocalDate> {
-
-		private String dAlanAdi;
-
-		public TarihProperty(String pAlanAdi, LocalDate pTarih) {
-			super();
-			dAlanAdi = pAlanAdi;
-			set(pTarih);
-		}
-
-		@Override
-		public void setValue(LocalDate pTarih) {
-			if (pTarih != null) {
-				super.set(pTarih);
-				setField(dAlanAdi, DateTime.asDbDate(pTarih), true);
-			} else {
-				super.set(null);
-				setField(dAlanAdi, BigDecimal.ZERO, true);
-			}
-		}
-	}
-
-	public class KodProperty<T> extends SimpleObjectProperty<IReference<T>> {
-
-		private String dAlanAdi;
-		private IReference<T> dBosDeger;
-
-		public KodProperty(String pAlanAdi, IReference<T> pKod, IReference<T> pBosDeger) {
-			super();
-			dAlanAdi = pAlanAdi;
-			dBosDeger = pBosDeger;
-			setValue(pKod);
-		}
-
-		@Override
-		public void set(IReference<T> pKod) {
-			super.set(pKod);
-			setField(dAlanAdi, pKod.getKey(), true);
-		}
-
-		@Override
-		public void setValue(IReference<T> pKod) {
-			if (pKod == null)
-				pKod = dBosDeger;
-			set(pKod);
-		}
-	}
+//	public class BooleanProperty extends SimpleBooleanProperty {
+//
+//		private String dAlanAdi;
+//		private Object dTrueDeger = Boolean.TRUE;
+//		private Object dFalseDeger = Boolean.FALSE;
+//
+//		public BooleanProperty(String pAlanAdi, Boolean pBoolean) {
+//			super(pBoolean);
+//			dAlanAdi = pAlanAdi;
+//		}
+//
+//		public BooleanProperty(String pAlanAdi, Boolean pBoolean, final Object pTrueDeger, final Object pFalseDeger) {
+//			super(pBoolean);
+//			dAlanAdi = pAlanAdi;
+//			dTrueDeger = pTrueDeger;
+//			dFalseDeger = pFalseDeger;
+//		}
+//
+//		@Override
+//		public void set(boolean pBoolean) {
+//			super.set(pBoolean);
+//			Object dDeger = pBoolean ? dTrueDeger : dFalseDeger;
+//			// if (!dDeger.equals(get(dAlanAdi)))
+//			DataEntity.this.set(dAlanAdi, dDeger);
+//		}
+//
+//		public Object getTrueDeger() {
+//			return dTrueDeger;
+//		}
+//
+//		public Object getFalseDeger() {
+//			return dFalseDeger;
+//		}
+//
+//	}
+//
+//	public class StringProperty extends SimpleStringProperty {
+//
+//		private String dAlanAdi;
+//		private boolean dDegisti;
+//		private CheckString checkString;
+//
+//		public StringProperty(String pAlanAdi, String pDeger) {
+//			super(pDeger);
+//			dAlanAdi = pAlanAdi;
+//			dDegisti = true;
+//		}
+//
+//		public StringProperty(String pAlanAdi, String pDeger, CheckString pCheckString) {
+//			this(pAlanAdi, pDeger);
+//			checkString = pCheckString;
+//		}
+//
+//		public StringProperty(String pAlanAdi, String pDeger, boolean pDegisti) {
+//			this(pAlanAdi, pDeger);
+//			dDegisti = pDegisti;
+//		}
+//
+//		@Override
+//		public void set(String pValue) {
+//			String value = checkString != null ? checkString.getChecked(pValue) : pValue;
+//			super.set(value);
+//			setField(dAlanAdi, value, dDegisti);
+//		}
+//
+//	}
+//
+//	public interface CheckString {
+//		String getChecked(String pValue);
+//	}
+//
+//	public class DoubleProperty extends SimpleDoubleProperty {
+//
+//		private String dAlanAdi;
+//		private Double dBosDeger;
+//		private boolean dChanged;
+//
+//		public DoubleProperty(String pAlanAdi, Double pSayi, Double pBosDeger, boolean pChanged) {
+//			super();
+//			dAlanAdi = pAlanAdi;
+//			dBosDeger = pBosDeger;
+//			dChanged = pChanged;
+//			setValue(pSayi);
+//		}
+//
+//		public DoubleProperty(String pAlanAdi, Double pSayi, Double pBosDeger) {
+//			this(pAlanAdi, pSayi, pBosDeger, true);
+//		}
+//
+//		@Override
+//		public void setValue(Number pSayi) {
+//			if (pSayi == null)
+//				pSayi = dBosDeger;
+//			set(pSayi.doubleValue());
+//		}
+//
+//		@Override
+//		public void set(double pSayi) {
+//			super.set(pSayi);
+//			setField(dAlanAdi, pSayi, dChanged);
+//		}
+//	}
+//
+//	public class BigDecimalProperty extends SimpleDoubleProperty {
+//
+//		private String dAlanAdi;
+//		private BigDecimal dBosDeger;
+//
+//		public BigDecimalProperty(String pAlanAdi, BigDecimal pSayi, BigDecimal pBosDeger) {
+//			super();
+//			dAlanAdi = pAlanAdi;
+//			dBosDeger = pBosDeger;
+//			setValue(pSayi);
+//		}
+//
+//		@Override
+//		public void setValue(Number pSayi) {
+//			if (pSayi == null)
+//				pSayi = dBosDeger;
+//			set(pSayi.doubleValue());
+//		}
+//
+//		@Override
+//		public void set(double pSayi) {
+//			super.set(pSayi);
+//			setField(dAlanAdi, new BigDecimal(pSayi), true);
+//		}
+//	}
+//
+//	public class IntegerProperty extends SimpleIntegerProperty {
+//
+//		private String dAlanAdi;
+//		private boolean dDegisti;
+//		private Integer dBosDeger;
+//
+//		public IntegerProperty(String pAlanAdi, Integer pSayi, Integer pBosDeger, boolean pDegisti) {
+//			super();
+//			dAlanAdi = pAlanAdi;
+//			dDegisti = pDegisti;
+//			dBosDeger = pBosDeger;
+//			setValue(pSayi);
+//		}
+//
+//		public IntegerProperty(String pAlanAdi, Integer pSayi, Integer pBosDeger) {
+//			this(pAlanAdi, pSayi, pBosDeger, true);
+//		}
+//
+//		@Override
+//		public void setValue(Number pSayi) {
+//			if (pSayi == null)
+//				pSayi = dBosDeger;
+//			set(pSayi.intValue());
+//		}
+//
+//		@Override
+//		public void set(int pSayi) {
+//			super.set(pSayi);
+//			setField(dAlanAdi, pSayi, dDegisti);
+//		}
+//
+//	}
+//
+//	public class TarihProperty extends SimpleObjectProperty<LocalDate> {
+//
+//		private String dAlanAdi;
+//
+//		public TarihProperty(String pAlanAdi, LocalDate pTarih) {
+//			super();
+//			dAlanAdi = pAlanAdi;
+//			set(pTarih);
+//		}
+//
+//		@Override
+//		public void setValue(LocalDate pTarih) {
+//			if (pTarih != null) {
+//				super.set(pTarih);
+//				setField(dAlanAdi, DateTime.asDbDate(pTarih), true);
+//			} else {
+//				super.set(null);
+//				setField(dAlanAdi, BigDecimal.ZERO, true);
+//			}
+//		}
+//	}	
+//
+//	public class KodProperty<T> extends SimpleObjectProperty<IReference<T>> {
+//		private String dAlanAdi;
+//		private IReference<T> dBosDeger;
+//
+//		public KodProperty(String pAlanAdi, IReference<T> pKod, IReference<T> pBosDeger) {
+//			super();
+//			dAlanAdi = pAlanAdi;
+//			dBosDeger = pBosDeger;
+//			setValue(pKod);
+//		}
+//
+//		@Override
+//		public void set(IReference<T> pKod) {
+//			super.set(pKod);
+//			setField(dAlanAdi, pKod.getKey(), true);
+//		}
+//
+//		@Override
+//		public void setValue(IReference<T> pKod) {
+//			if (pKod == null)
+//				pKod = dBosDeger;
+//			set(pKod);
+//		}
+//	}
 
 }
