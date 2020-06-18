@@ -36,6 +36,10 @@ public class MyLogger {
 		logger.log(pSeviye, pGunluk);
 	}
 
+	public void log(Level pSeviye, String pFormat, Object... pArgs) {
+		logger.log(pSeviye, pFormat, pArgs);
+	}
+
 	public void log(Level pSeviye, String pGunluk, Throwable thrown) {
 		logger.log(pSeviye, pGunluk, thrown);
 	}
