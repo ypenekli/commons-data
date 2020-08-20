@@ -7,8 +7,15 @@ import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.apache.commons.io.FileUtils;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 
 import com.yp.core.BaseConstants;
 
@@ -755,4 +762,44 @@ public final class StringTool {
 		stringWithTurkishChars = stringWithTurkishChars.replace("Ç", "C");
 		return stringWithTurkishChars;
 	}
+
+	public static void replaceInFile(String fileToReplace, String fileReplacements) throws IOException {
+		try (Scanner sc = new Scanner(new File(fileToReplace))) {
+			// instantiating the StringBuffer class
+			StringBuilder buffer = new StringBuilder();
+			// Reading lines of the file and appending them to StringBuffer
+			while (sc.hasNextLine()) {
+				buffer.append(sc.nextLine() + System.lineSeparator());
+			}
+			String fileContents = buffer.toString();
+
+			try (Scanner sc2 = new Scanner(new File(fileReplacements))) {
+				while (sc2.hasNextLine()) {
+					String[] replaces = sc2.nextLine().split("=");
+					if (replaces != null && replaces.length > 1)
+						fileContents = fileContents.replaceAll(replaces[0], replaces[1]);
+				}
+			}
+
+			// instantiating the FileWriter class
+			try (FileWriter writer = new FileWriter(fileToReplace)) {
+				writer.append(fileContents);
+				writer.flush();
+			}
+
+		}
+
+	}
+
+	public static void main(String[] args) {
+		if (args != null && args.length > 2) {
+			try {
+				FileUtils.copyFile(new File(args[0]), new File(args[1]));
+				replaceInFile(args[1], args[2]);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
 }
+
