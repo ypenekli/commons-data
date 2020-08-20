@@ -11,9 +11,11 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -45,6 +47,7 @@ public class DbHandler<T> implements IHandler<T> {
 	public static final String DB_PASSWORD = ".DBPASSWORD";
 	public static final String DB_DRIVER = ".DBDRIVER";
 	public static final String DB_SCHEMASEPERATOR = ".DBSCHEMASEPERATOR";
+	public static final String DB_SCHEMAS = ".DBSCHEMAS.";
 	public static final String INSERT_INTO = " INSERT INTO ";
 	public static final String WHERE = " WHERE ";
 	public static final String SELECT = " SELECT ";
@@ -73,6 +76,7 @@ public class DbHandler<T> implements IHandler<T> {
 
 	private String schemaSeperator = ".";
 	private Properties config;
+	private Properties schemas;
 	private DataSource dataSource;
 	private String url;
 
@@ -82,6 +86,7 @@ public class DbHandler<T> implements IHandler<T> {
 
 	public DbHandler(Class<? extends AModel<T>> pCallerClass, String pServer) {
 		builtConnection(pServer, null);
+		loadSchemas(pServer);
 		callerClass = pCallerClass;
 		paramList = new ArrayList<>();
 		valueList = new ArrayList<>();
@@ -89,6 +94,18 @@ public class DbHandler<T> implements IHandler<T> {
 
 	public DbHandler(Class<? extends AModel<T>> pCallerClass) {
 		this(pCallerClass, null);
+	}
+	
+
+
+	private String getSchemaName(IDataEntity pE) {
+		return (String) schemas.getOrDefault(pE.getSchemaName(), pE.getSchemaName());
+	}
+
+	private void loadSchemas(String pServer) {
+		schemas = new Properties();
+		String server = BaseConstants.getConfig(!StringTool.isNull(pServer) ? pServer : BaseConstants.SERVER);
+		schemas = BaseConstants.getSubConfigs(server + DB_SCHEMAS);
 	}
 
 	private void builtConnection(String pServer, String pDbFileName) {
@@ -594,7 +611,7 @@ public class DbHandler<T> implements IHandler<T> {
 		return result;
 	}
 
-	private String generatePkQuery(IDataEntity pEntity, ArrayList<String> pkList) {
+	private String generatePkQuery(IDataEntity pEntity, List<String> pkList) {
 		StringBuilder select = new StringBuilder(SELECT);
 		StringBuilder where = new StringBuilder(WHERE);
 		for (Map.Entry<String, IElement> e : pEntity.getPrimaryKeys().entrySet()) {
@@ -611,7 +628,7 @@ public class DbHandler<T> implements IHandler<T> {
 		if (select.length() > SELECT.length()) {
 			select.setLength(select.length() - BaseConstants.COMMA_WITH_SPACE.length());
 			select.append(FROM);
-			select.append(pEntity.getSchemaName()).append(schemaSeperator).append(pEntity.getTableName());
+			select.append(getSchemaName(pEntity)).append(schemaSeperator).append(pEntity.getTableName());
 			if (where.length() > WHERE.length()) {
 				where.setLength(where.length() - AND.length());
 				select.append(where);
@@ -691,14 +708,14 @@ public class DbHandler<T> implements IHandler<T> {
 	private void generateSellectCommand(IDataEntity pDataEntity) {
 		checkFields(pDataEntity);
 		StringBuilder sb = new StringBuilder(SELECT_FROM);
-		sb.append(pDataEntity.getSchemaName()).append(schemaSeperator).append(pDataEntity.getTableName());
+		sb.append(getSchemaName(pDataEntity)).append(schemaSeperator).append(pDataEntity.getTableName());
 		query = appendFilter(pDataEntity, sb);
 	}
 
 	private void generateDeleteCommand(IDataEntity pDataEntity) {
 		checkFields(pDataEntity);
 		StringBuilder sb = new StringBuilder(DELETE);
-		sb.append(FROM).append(pDataEntity.getSchemaName()).append(schemaSeperator).append(pDataEntity.getTableName());
+		sb.append(FROM).append(getSchemaName(pDataEntity)).append(schemaSeperator).append(pDataEntity.getTableName());
 		query = appendFilter(pDataEntity, sb);
 	}
 
@@ -728,7 +745,7 @@ public class DbHandler<T> implements IHandler<T> {
 		checkFields(pDataEntity);
 		if (!paramList.isEmpty()) {
 			StringBuilder sb = new StringBuilder(INSERT_INTO);
-			sb.append(pDataEntity.getSchemaName()).append(schemaSeperator).append(pDataEntity.getTableName());
+			sb.append(getSchemaName(pDataEntity)).append(schemaSeperator).append(pDataEntity.getTableName());
 			sb.append(" (");
 			StringBuilder values = new StringBuilder(VALUES);
 			values.append(" (");
@@ -750,7 +767,7 @@ public class DbHandler<T> implements IHandler<T> {
 		checkFields(pDataEntity);
 		if (!paramList.isEmpty()) {
 			StringBuilder sb = new StringBuilder(UPDATE);
-			sb.append(pDataEntity.getSchemaName()).append(schemaSeperator).append(pDataEntity.getTableName());
+			sb.append(getSchemaName(pDataEntity)).append(schemaSeperator).append(pDataEntity.getTableName());
 			sb.append(SET);
 			for (String k : paramList) {
 				sb.append(k).append(" = ?, ");
@@ -787,6 +804,10 @@ public class DbHandler<T> implements IHandler<T> {
 				valueList.add(fp.getValue());
 			}
 		query = pQuery.getQuery().replace(REGEX_SCHEMA_SEPERATOR, schemaSeperator);
+		for (Iterator<Entry<Object, Object>> iterator = schemas.entrySet().iterator(); iterator.hasNext();) {
+			Entry<Object, Object> e =  iterator.next();
+			query = query.replaceAll((String)e.getKey(), (String)e.getValue());
+		}
 	}
 
 	private void clear() {

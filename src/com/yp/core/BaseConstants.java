@@ -18,6 +18,7 @@ import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.MissingResourceException;
@@ -239,6 +240,21 @@ public class BaseConstants {
 			getConfig(pKey);
 		}
 		BaseConstants.config.setProperty(pKey, pVale);
+	}
+
+	public static Properties getSubConfigs(final String pPartialKey) {
+		if (BaseConstants.config == null) {
+			loadConfig();
+		}
+		Properties p = new Properties();
+		for (Iterator<String> iterator = config.stringPropertyNames().iterator(); iterator.hasNext();) {
+			String key = iterator.next();
+			if (key.startsWith(pPartialKey)) {
+				String key2 = key.substring(pPartialKey.length());
+				p.put(key2, config.getProperty(key));
+			}
+		}
+		return p;
 	}
 
 	public static void saveConfig() {
