@@ -13,6 +13,7 @@ import com.yp.core.db.OnExportListener.PHASE;
 import com.yp.core.entity.IResult;
 import com.yp.core.tools.DateTime;
 
+//TODO Check conection/pool size.
 public class DbTransfer {
 
 	private ConcurrentHashMap<String, FutureTask<IResult<ITransfer>>> tranfers;

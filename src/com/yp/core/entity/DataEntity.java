@@ -319,6 +319,12 @@ public class DataEntity implements IDataEntity {
 			setField(pFieldName, (int) Double.parseDouble(temp.toString()), false);
 	}
 
+	public void checkLong(String pFieldName) {
+		Object temp = get(pFieldName);
+		if (temp != null && !(temp instanceof Long))
+			setField(pFieldName, (long) Double.parseDouble(temp.toString()), false);
+	}
+
 	public void checkBigDecimal(String pFieldName) {
 		Object temp = get(pFieldName);
 		if (temp != null && !(temp instanceof BigDecimal))
@@ -337,6 +343,19 @@ public class DataEntity implements IDataEntity {
 			setField(pFieldName, pFormat.format(temp), false);
 	}
 
+	public void checkBlob(String pFieldName) {
+//		Object temp = get(pFieldName);
+//		if (temp != null && !(temp instanceof Blob))
+//			setField(pFieldName, getBlob(pFieldName), false);
+	}
+
+	public void checkClob(String pFieldName) {
+//		Object temp = get(pFieldName);
+//		if (temp != null && !(temp instanceof Clob))
+//			setField(pFieldName, getClob(pFieldName), false);
+
+	}
+
 	@Override
 	public String getSchemaName() {
 		return "";
@@ -347,25 +366,45 @@ public class DataEntity implements IDataEntity {
 		return "";
 	}
 
+	protected static final String CLIENT_NAME = "client_name";
+	protected static final String CLIENT_IP = "client_ip";
+	protected static final String CLIENT_DATETIME = "client_datetime";
+	protected static final String LAST_CLIENT_NAME = "last_client_name";
+	protected static final String LAST_CLIENT_IP = "last_client_ip";
+	protected static final String LAST_CLIENT_DATETIME = "last_client_datetime";
+
 	@Override
-	public void setUserInfo(IDataEntity pDataEntity) {
-		setKln((DataEntity) pDataEntity);
+	public void setClientInfo(IDataEntity pDataEntity) {
+		set(CLIENT_NAME, pDataEntity.get(CLIENT_NAME));
+		set(CLIENT_IP, pDataEntity.get(CLIENT_IP));
+		set(CLIENT_DATETIME, pDataEntity.get(CLIENT_DATETIME));
 	}
 
 	@Override
-	public void setLastUserInfo(IDataEntity pDataEntity) {
-		setSonkln((DataEntity) pDataEntity);
+	public void setLastClientInfo(IDataEntity pDataEntity) {
+		set(LAST_CLIENT_NAME, pDataEntity.get(LAST_CLIENT_NAME));
+		set(LAST_CLIENT_IP, pDataEntity.get(LAST_CLIENT_IP));
+		set(LAST_CLIENT_DATETIME, pDataEntity.get(LAST_CLIENT_DATETIME));
+		if (isNew()) {
+			setClientInfo(pDataEntity);
+		}
 	}
 
 	@Override
-	public void setUserInfo(String pUser, String pClientIP, Date pDate) {
-		setKln(pUser, pClientIP, pDate);
+	public void setClientInfo(String pClientName, String pClientIP, Date pClientDatetime) {
+		set(CLIENT_NAME, pClientName);
+		set(CLIENT_IP, pClientIP);
+		set(CLIENT_DATETIME, DateTime.asDbDate(pClientDatetime));
 	}
 
 	@Override
-	public void setLastUserInfo(String pUser, String pClientIP, Date pDate) {
-		setSonkln(pUser, pClientIP, pDate);
-
+	public void setLastClientInfo(String pClientName, String pClientIP, Date pClientDatetime) {
+		set(CLIENT_NAME, pClientName);
+		set(CLIENT_IP, pClientIP);
+		set(CLIENT_DATETIME, DateTime.asDbDate(pClientDatetime));
+		if (isNew()) {
+			setClientInfo(pClientName, pClientIP, pClientDatetime);
+		}
 	}
 
 	private static final String ALN_Kln = "Kln";
@@ -435,14 +474,6 @@ public class DataEntity implements IDataEntity {
 	public String getSonkln() {
 		return (String) get(ALN_Sonkln);
 	}
-
-	// public void setSonkln(String pSonkln) {
-	// set(ALN_Sonkln, pSonkln);
-	// setSontrhzmn(new Date());
-	// if (isYeni()) {
-	// setKln(pSonkln, getSontrhzmn());
-	// }
-	// }
 
 	public void setSonkln(String pSonkln, Date pTrhZmn) {
 		setSonkln(pSonkln, "yerel", pTrhZmn);

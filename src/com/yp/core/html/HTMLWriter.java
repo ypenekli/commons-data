@@ -156,7 +156,7 @@ public abstract class HTMLWriter {
 			writer.append(BaseConstants.EOL_HTML);
 			writer.append(user.getEmail());
 			writer.append(BaseConstants.EOL_HTML);
-			writer.append(user.getMobilePhoneNum());
+			writer.append(user.getMobilePhoneNu());
 			writer.append(BaseConstants.EOL_HTML);
 		}
 	}

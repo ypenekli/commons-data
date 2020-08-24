@@ -220,20 +220,20 @@ public abstract class AModel<T> {
 			}
 	}
 
-	public static void setLastUserInfo(IDataEntity pVs, IUser pUser) {
+	public static void setLastClientInfo(IDataEntity pVs, IUser pUser) {
 		String email = "Admin@yp.com";
 		if (pUser != null) {
 			email = pUser.getEmail();
 		}
-		pVs.setLastUserInfo(email, getClientIP(), Calendar.getInstance().getTime());
+		pVs.setLastClientInfo(email, getClientIP(), Calendar.getInstance().getTime());
 	}
 
-	public static void setUserInfo(IDataEntity pVs, IUser pUser) {
+	public static void setClientInfo(IDataEntity pVs, IUser pUser) {
 		String email = "Admin@yp.com";
 		if (pUser != null) {
 			email = pUser.getEmail();
 		}
-		pVs.setUserInfo(email, getClientIP(), Calendar.getInstance().getTime());
+		pVs.setClientInfo(email, getClientIP(), Calendar.getInstance().getTime());
 	}
 
 	public static String zipFile(String pFileAddress, String pFileName) {
@@ -394,7 +394,7 @@ public abstract class AModel<T> {
 					if (!BaseConstants.isEmpty(dListe)) {
 						for (IDataEntity dVs : dListe) {
 							IDataEntity dVsYeni = dSinif.getConstructor(IDataEntity.class).newInstance(dVs);
-							dVsYeni.setLastUserInfo(dKln, dUzkadr, dTrhzmn);
+							dVsYeni.setLastClientInfo(dKln, dUzkadr, dTrhzmn);
 							dEkleListe.add(dVsYeni);
 						}
 						saveAll(dEkleListe);

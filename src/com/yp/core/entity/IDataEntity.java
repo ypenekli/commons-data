@@ -69,11 +69,11 @@ public interface IDataEntity extends Serializable {
 
 	void checkValues();
 
-	void setUserInfo(IDataEntity pDataEntity);
+	void setClientInfo(IDataEntity pDataEntity);
 
-	void setLastUserInfo(IDataEntity pDataEntity);
+	void setLastClientInfo(IDataEntity pDataEntity);
 
-	void setUserInfo(String pUser, String pClientIP, Date pDate);
+	void setClientInfo(String pUser, String pClientIP, Date pDate);
 
-	void setLastUserInfo(String pUser, String pClientIP, Date pDate);
+	void setLastClientInfo(String pUser, String pClientIP, Date pDate);
 }
