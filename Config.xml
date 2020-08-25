@@ -15,7 +15,7 @@
 <entry key="SERVER8.DBURL">jdbc:as400://LOCALHOST</entry>
 <entry key="SERVER2.DBDRIVER">org.apache.derby.jdbc.EmbeddedDriver</entry>
 <entry key="SERVER6.EK.ARTTIR"/>
-<entry key="SERVER2.DBURL">jdbc:derby:veri/PRJTKP;create=false</entry>
+<entry key="SERVER2.DBURL">jdbc:derby:db/data1;create=false</entry>
 <entry key="SERVER4.DBDRIVER">sun.jdbc.odbc.JdbcOdbcDriver</entry>
 <entry key="SERVER2.KEY">SERVER2</entry>
 <entry key="SERVER1.EK.ARTTIR"/>
@@ -59,7 +59,7 @@
 <entry key="SERVER8.DBPASSWORD"/>
 <entry key="SERVER1.NAME">MS SQL Server</entry>
 <entry key="SERVER2.EK.ARTTIR"/>
-<entry key="USER.NAME">ypenekli@gmail.com</entry>
+<entry key="USER.NAME">admin</entry>
 <entry key="SERVER5.KEY">SERVER5</entry>
 <entry key="SERVER4.DBPASSWORD"/>
 <entry key="SERVER7.DBSCHEMASEPERATOR">.</entry>

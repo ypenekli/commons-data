@@ -394,14 +394,14 @@ public class DataEntity implements IDataEntity {
 	public void setClientInfo(String pClientName, String pClientIP, Date pClientDatetime) {
 		set(CLIENT_NAME, pClientName);
 		set(CLIENT_IP, pClientIP);
-		set(CLIENT_DATETIME, DateTime.asDbDate(pClientDatetime));
+		set(CLIENT_DATETIME, DateTime.asDbDateTime(pClientDatetime));
 	}
 
 	@Override
 	public void setLastClientInfo(String pClientName, String pClientIP, Date pClientDatetime) {
-		set(CLIENT_NAME, pClientName);
-		set(CLIENT_IP, pClientIP);
-		set(CLIENT_DATETIME, DateTime.asDbDate(pClientDatetime));
+		set(LAST_CLIENT_NAME, pClientName);
+		set(LAST_CLIENT_IP, pClientIP);
+		set(LAST_CLIENT_DATETIME, DateTime.asDbDateTime(pClientDatetime));
 		if (isNew()) {
 			setClientInfo(pClientName, pClientIP, pClientDatetime);
 		}

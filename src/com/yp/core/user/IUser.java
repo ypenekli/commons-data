@@ -26,7 +26,7 @@ public interface IUser extends IDataEntity {
 
 	void setPassword(String pPassword);
 
-	void setStatusActive(Boolean pStatus);
+	void setStatusActive(boolean pStatus);
 
 	void setLoginErrorCount(Integer pLoginErrorCount);
 

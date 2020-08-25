@@ -378,28 +378,27 @@ public abstract class AModel<T> {
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public void transferXlsToDb(final String pDosyaAdi, IDataEntity[] pTabloDizi) {
-		List dEkleListe = new ArrayList<>();
-		List<IDataEntity> dListe = new ArrayList<>();
+	public void transferXlsToDb(final String pFileName, IDataEntity[] pTables) {
+		List addList = new ArrayList<>();
+		List<IDataEntity> list = new ArrayList<>();
 
-		String dKln = "11111";
-		String dUzkadr = getClientIP();
-		Date dTrhzmn = new Date();
-		try (InputStream file = BaseConstants.class.getResourceAsStream(pDosyaAdi)) {
-			if (file != null) {
-				org.apache.poi.ss.usermodel.Workbook dWb = WorkbookFactory.create(file);
-				for (int dI = 0; dI < pTabloDizi.length; dI++) {
-					Class<? extends IDataEntity> dSinif = pTabloDizi[dI].getClass();
-					dListe = readFromExcelWorkbook(dWb, pTabloDizi[dI].getTableName(), null, true, dSinif);
-					if (!BaseConstants.isEmpty(dListe)) {
-						for (IDataEntity dVs : dListe) {
-							IDataEntity dVsYeni = dSinif.getConstructor(IDataEntity.class).newInstance(dVs);
-							dVsYeni.setLastClientInfo(dKln, dUzkadr, dTrhzmn);
-							dEkleListe.add(dVsYeni);
+		String clientName = "11111";
+		String ckientIp = getClientIP();
+		Date datetime = new Date();
+		try (InputStream file = BaseConstants.class.getResourceAsStream(pFileName)) {
+			try (org.apache.poi.ss.usermodel.Workbook dWb = WorkbookFactory.create(file)) {
+				for (int dI = 0; dI < pTables.length; dI++) {
+					Class<? extends IDataEntity> classs = pTables[dI].getClass();
+					list = readFromExcelWorkbook(dWb, pTables[dI].getTableName(), null, true, classs);
+					if (!BaseConstants.isEmpty(list)) {
+						for (IDataEntity de : list) {
+							IDataEntity add = classs.getConstructor(IDataEntity.class).newInstance(de);
+							add.setLastClientInfo(clientName, ckientIp, datetime);
+							addList.add(add);
 						}
-						saveAll(dEkleListe);
-						dEkleListe.clear();
-						dListe.clear();
+						saveAll(addList);
+						addList.clear();
+						list.clear();
 					}
 				}
 			}
