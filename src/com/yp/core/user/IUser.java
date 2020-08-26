@@ -19,6 +19,8 @@ public interface IUser extends IDataEntity {
 	String getFullName();
 
 	String getPassword();
+	
+	Integer getLoginErrorCount();
 
 	boolean isStatusActive();
 
@@ -33,5 +35,7 @@ public interface IUser extends IDataEntity {
 	void setCheckinDate(Date pCheckinDate);
 
 	void setCheckoutDate(Date pCheckoutDate);
+	
+	void incrementLoginErrorCount();
 
 }

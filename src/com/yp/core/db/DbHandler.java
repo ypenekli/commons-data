@@ -95,8 +95,6 @@ public class DbHandler<T> implements IHandler<T> {
 	public DbHandler(Class<? extends AModel<T>> pCallerClass) {
 		this(pCallerClass, null);
 	}
-	
-
 
 	private String getSchemaName(IDataEntity pE) {
 		return (String) schemas.getOrDefault(pE.getSchemaName(), pE.getSchemaName());
@@ -236,7 +234,7 @@ public class DbHandler<T> implements IHandler<T> {
 	}
 
 	private List<IDataEntity> readAny(Type pOutType) {
-		ArrayList<IDataEntity> list = null;
+		List<IDataEntity> list = null;
 		if (connection != null) {
 			try (PreparedStatement ps = connection.prepareStatement(query);) {
 				for (int i = 0; i < paramList.size(); i++) {
@@ -254,16 +252,15 @@ public class DbHandler<T> implements IHandler<T> {
 
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public ArrayList<T> findAny(DbCommand pQuery) {
-		ArrayList<T> list = null;
+	public List<T> findAny(DbCommand pQuery) {
+		List<T> list = null;
 		refreshValues(pQuery);
 		if (query != null) {
 			boolean closed = connection == null;
 			try {
 				if (closed)
 					connection = getConnection();
-				list = (ArrayList) readAny(getTypeParameterClass());
-
+				list = (List) readAny(getTypeParameterClass());
 			} catch (SQLException e) {
 				Logger.getLogger(MyLogger.NAME).log(Level.SEVERE, e.getMessage(), e);
 			} finally {
@@ -641,11 +638,11 @@ public class DbHandler<T> implements IHandler<T> {
 	private void checkAndGeneratePk(IDataEntity pEntity) {
 		try {
 			clear();
-			ArrayList<String> pkList = new ArrayList<>();
+			List<String> pkList = new ArrayList<>();
 			if (pEntity.getPrimaryKeys().size() > 0) {
 				query = generatePkQuery(pEntity, pkList);
 				if (query != null) {
-					IDataEntity vs = findPk(query);
+					IDataEntity vs = findPk(query, pEntity.getClass());
 					for (String key : pkList) {
 						if (vs != null && !vs.isNull(key))
 							pEntity.set(key, vs.get(key));
@@ -659,7 +656,7 @@ public class DbHandler<T> implements IHandler<T> {
 		}
 	}
 
-	public IDataEntity findPk(String pQuery) {
+	public IDataEntity findPk(String pQuery, Type pOutType) {
 		IDataEntity de = null;
 		if (pQuery != null) {
 			query = pQuery;
@@ -667,7 +664,9 @@ public class DbHandler<T> implements IHandler<T> {
 			try {
 				if (closed)
 					connection = getConnection();
-				de = readOne(DataEntity.class);
+				de = readOne(pOutType);
+				if (de != null)
+					de.checkValues();
 			} catch (SQLException e) {
 				Logger.getLogger(MyLogger.NAME).log(Level.SEVERE, e.getMessage(), e);
 			} finally {
@@ -805,8 +804,8 @@ public class DbHandler<T> implements IHandler<T> {
 			}
 		query = pQuery.getQuery().replace(REGEX_SCHEMA_SEPERATOR, schemaSeperator);
 		for (Iterator<Entry<Object, Object>> iterator = schemas.entrySet().iterator(); iterator.hasNext();) {
-			Entry<Object, Object> e =  iterator.next();
-			query = query.replaceAll((String)e.getKey(), (String)e.getValue());
+			Entry<Object, Object> e = iterator.next();
+			query = query.replaceAll((String) e.getKey(), (String) e.getValue());
 		}
 	}
 
@@ -1054,8 +1053,8 @@ public class DbHandler<T> implements IHandler<T> {
 	private static final String FORMATED_EXPORT_MESSAGE = "%s: %s";
 	private static final String FORMATED_EXPORT_MESSAGE2 = "%s: %s%s";
 
-	private IResult<ITransfer> transfer(ITransfer pTransfer, Connection targetConn, String sourceQuery, String targetTable,
-			Integer count, OnExportListener proceedListener) throws SQLException {
+	private IResult<ITransfer> transfer(ITransfer pTransfer, Connection targetConn, String sourceQuery,
+			String targetTable, Integer count, OnExportListener proceedListener) throws SQLException {
 		final String msgExportStarts = BaseConstants.getString("DbHandler.Transfer.Starts");
 		final String msgExportSaves = BaseConstants.getString("DbHandler.Transfer.Saves");
 		final String msgExportSaved = BaseConstants.getString("DbHandler.Transfer.Saved");

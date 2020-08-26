@@ -148,8 +148,8 @@ public class BaseConstants {
 		MESSAGE_DELETE_ERROR = getString("1024");
 		MESSAGE_CONNECTION_ERROR = getString("Hata.Baglanti");
 		MESSAGE_FIELD_EMPTY_WARNING = getString("1022");
-		NEW = getString("Yenigiris");
-		UPDATE = getString("Guncelleme");
+		NEW = getString("Addnew");
+		UPDATE = getString("Update");
 		LOCALE_TR = new Locale("tr", "TR");
 		LOCALE_EN = new Locale("en", "US");
 		SLASH_OS = System.getProperty("file.separator");
