@@ -6,6 +6,8 @@ public interface ITree<T> {
 
 	public T getParentValue();
 
+	public String getName();
+
 	public String getDescription();
 
 	public boolean isLeaf();
