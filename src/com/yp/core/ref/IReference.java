@@ -2,18 +2,18 @@ package com.yp.core.ref;
 
 import com.yp.core.entity.IDataEntity;
 
-public interface IReference<T> extends IDataEntity{
+public interface IReference<T> extends IDataEntity{	
 
 	T getKey();
 
 	void setKey(T pKey);
 
-	String getDefinition();
+	String getValue();
 
-	void setDefinition(String pDefinition);
+	void setValue(String pDefinition);
 
-	String getExtra();
+	String getDescription();
 
-	void setExtra(String pExtra);
+	void setDescription(String pExtra);
 
 }

@@ -5,35 +5,35 @@ import com.yp.core.entity.DataEntity;
 public class Reference<T> extends DataEntity implements IReference<T> {
 
 	public static final transient String KEY = "key";
-	public static final transient String DEFINITION = "definition";
-	private static final String extraFieldName = "extra";
+	public static final transient String VALUE = "value";
+	private static final String descriptionFieldName = "description";
 
 	private static final long serialVersionUID = 7652554245250573812L;
 	private String keyFieldName;
-	private String definitionFieldName;
+	private String valueFieldName;
 	private String toStringFieldName;
 
-	public Reference(String pKeyFieldName, T pKeyFieldValue, String pDefinitionFieldName,
-			String pDefinitionFieldValue) {
+	public Reference(String pKeyFieldName, T pKeyFieldValue, String pValueFieldName,
+			String pValueFieldValue) {
 		super();
 		keyFieldName = pKeyFieldName;
-		definitionFieldName = pDefinitionFieldName;
-		toStringFieldName = definitionFieldName;
+		valueFieldName = pValueFieldName;
+		toStringFieldName = valueFieldName;
 		setKey(pKeyFieldValue);
-		setDefinition(pDefinitionFieldValue);
+		setValue(pValueFieldValue);
 	}
 
-	public Reference(T pKeyFieldValue, String pDefinitionFieldValue) {
-		this(KEY, pKeyFieldValue, DEFINITION, pDefinitionFieldValue);
+	public Reference(T pKeyFieldValue, String pValueFieldValue) {
+		this(KEY, pKeyFieldValue, VALUE, pValueFieldValue);
 	}
 
 	public Reference(T pKeyFieldValue) {
-		this(KEY, pKeyFieldValue, DEFINITION, pKeyFieldValue.toString());
+		this(KEY, pKeyFieldValue, VALUE, pKeyFieldValue.toString());
 	}
 
-	public Reference(T pKeyFieldValue, String pDefinitionFieldValue, String pExtra) {
-		this(pKeyFieldValue, pDefinitionFieldValue);
-		set(extraFieldName, pExtra);
+	public Reference(T pKeyFieldValue, String pVlueFieldValue, String pExtra) {
+		this(pKeyFieldValue, pVlueFieldValue);
+		set(descriptionFieldName, pExtra);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -48,23 +48,23 @@ public class Reference<T> extends DataEntity implements IReference<T> {
 	}
 
 	@Override
-	public String getDefinition() {
-		return (String) get(definitionFieldName);
+	public String getValue() {
+		return (String) get(valueFieldName);
 	}
 
 	@Override
-	public void setDefinition(String pAck) {
-		set(definitionFieldName, pAck);
+	public void setValue(String pValue) {
+		set(valueFieldName, pValue);
 	}
 
 	@Override
-	public String getExtra() {
-		return (String) get(extraFieldName);
+	public String getDescription() {
+		return (String) get(descriptionFieldName);
 	}
 
 	@Override
-	public void setExtra(String pExtra) {
-		set(extraFieldName, pExtra);
+	public void setDescription(String pExtra) {
+		set(descriptionFieldName, pExtra);
 	}
 
 	public void setToStringField(String pToStringField) {

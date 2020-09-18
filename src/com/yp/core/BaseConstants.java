@@ -36,8 +36,7 @@ public class BaseConstants {
 	private BaseConstants() {
 	}
 
-	private static final String config_url = "/core/config/Config.properties";
-	private static final ResourceBundle bundleSql = ResourceBundle.getBundle("core.config.Queries");
+	private static final String config_url = "/core/config/Config.properties";	
 	public static final ResourceBundle BUNDLE_MESSAGE = ResourceBundle.getBundle("core.config.Messages");
 
 	public static final String ERRORCODE_CONNECTION = "10000";
@@ -273,14 +272,6 @@ public class BaseConstants {
 	public static String getString(final String pKey) {
 		try {
 			return BaseConstants.BUNDLE_MESSAGE.getString(pKey);
-		} catch (MissingResourceException e) {
-			return String.valueOf('!') + pKey + '!';
-		}
-	}
-
-	public static String getSgl(final String pKey) {
-		try {
-			return BaseConstants.bundleSql.getString(pKey);
 		} catch (MissingResourceException e) {
 			return String.valueOf('!') + pKey + '!';
 		}

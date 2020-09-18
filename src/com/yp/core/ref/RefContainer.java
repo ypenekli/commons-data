@@ -40,15 +40,15 @@ public class RefContainer<T> implements Serializable {
 		return self.computeIfPresent(pKey, (k, v) -> v);
 	}
 
-	public String getDefinition(T pKey) {
+	public String getValue(T pKey) {
 		if (containsKey(pKey))
-			return self.get(pKey).getDefinition();
+			return self.get(pKey).getValue();
 		return null;
 	}
 
-	public String getExtra(T pKey) {
+	public String getDescription(T pKey) {
 		if (containsKey(pKey))
-			return self.get(pKey).getExtra();
+			return self.get(pKey).getDescription();
 		return null;
 	}
 
