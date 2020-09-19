@@ -35,9 +35,9 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 
 import com.yp.core.db.DbCommand;
-import com.yp.core.db.DbConninfo;
+import com.yp.core.db.DbConnInfo;
 import com.yp.core.db.DbHandler;
-import com.yp.core.db.ITransfer;
+import com.yp.core.db.IExport;
 import com.yp.core.db.OnExportListener;
 import com.yp.core.entity.EntityFactory;
 import com.yp.core.entity.IDataEntity;
@@ -358,15 +358,15 @@ public abstract class AModel<T> {
 		return handler.findDbTables(pLibrary, pSchema);
 	}
 
-	public IResult<ITransfer> transferDb(DbConninfo pTarget, ITransfer pTransfer, OnExportListener proceedListener) {
-		return handler.transferDb(pTarget, pTransfer, proceedListener);
+	public IResult<IExport> exportDb(DbConnInfo pTarget, IExport pExport, OnExportListener proceedListener) {
+		return handler.exportDb(pTarget, pExport, proceedListener);
 	}
 
-	public IResult<AXlsAktar> transferToXls(final DbCommand pQuery, Type pOutType, AXlsAktar pXls) {
-		return handler.transferToXls(pQuery, pOutType, pXls);
+	public IResult<AXlsAktar> exportToXls(final DbCommand pQuery, Type pOutType, AXlsAktar pXls) {
+		return handler.exportToXls(pQuery, pOutType, pXls);
 	}
 
-	public IResult<AXlsAktar> transferToXls(List<? extends IDataEntity> pList, AXlsAktar pXls) {
+	public IResult<AXlsAktar> exportToXls(List<? extends IDataEntity> pList, AXlsAktar pXls) {
 		IResult<AXlsAktar> res = new Result<>();
 		if (!BaseConstants.isEmpty(pList)) {
 			res.setSuccess(true);
@@ -378,7 +378,7 @@ public abstract class AModel<T> {
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public void transferXlsToDb(final String pFileName, IDataEntity[] pTables) {
+	public void exportXlsToDb(final String pFileName, IDataEntity[] pTables) {
 		List addList = new ArrayList<>();
 		List<IDataEntity> list = new ArrayList<>();
 

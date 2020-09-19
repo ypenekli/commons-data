@@ -4,8 +4,8 @@ import java.lang.reflect.Type;
 import java.util.List;
 
 import com.yp.core.db.DbCommand;
-import com.yp.core.db.DbConninfo;
-import com.yp.core.db.ITransfer;
+import com.yp.core.db.DbConnInfo;
+import com.yp.core.db.IExport;
 import com.yp.core.db.OnExportListener;
 import com.yp.core.entity.IDataEntity;
 import com.yp.core.entity.IResult;
@@ -39,8 +39,8 @@ public interface IHandler<T> {
 
 	List<IDataEntity> findDbTables(String pLibrary, String pSchema);
 	
-	IResult<AXlsAktar> transferToXls(DbCommand pQuery, Type pOutType, AXlsAktar pXls);
+	IResult<AXlsAktar> exportToXls(DbCommand pQuery, Type pOutType, AXlsAktar pXls);
 
-	IResult<ITransfer> transferDb(DbConninfo pTarget, ITransfer pTransfer, OnExportListener proceedListener);
+	IResult<IExport> exportDb(DbConnInfo pTarget, IExport pTransfer, OnExportListener proceedListener);
 
 }

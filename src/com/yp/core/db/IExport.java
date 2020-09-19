@@ -2,26 +2,51 @@ package com.yp.core.db;
 
 import java.math.BigDecimal;
 
-public interface IExport {
+import com.yp.core.entity.IDataEntity;
+
+public interface IExport extends IDataEntity, Comparable<IExport> {
 	String getExportId();
-	
+
+	String getGroupCode();
+
 	String getSourceSchema();
+
 	String getSourceTable();
-	Integer getSourceCount();
-	void setSourceCount(Integer pCount);
-	
+
 	String getTargetSchema();
+
 	String getTargetTable();
+
+	Integer getSourceCount();
+
 	Integer getTargetCount();
-	void setTargetCount(Integer pCount);
-	
-	void setStartTime(BigDecimal pTime);
-	void setEndTime(BigDecimal pTime);
-	
-	String getQuery();	
+
+	Integer getIdx();
+
 	String getMessages();
+
+	String getQuery();
+
+	void setTargetSchema(String pTargetSchema);
+
+	void setGroupCode(String pGroupCode);
+
+	void setSourceCount(Integer pCount);
+
+	void setTargetCount(Integer pCount);
+
+	void setIdx(Integer pIdx);
+
+	void setStartDatetimeDb(BigDecimal pTime);
+
+	void setEndDatetimeDb(BigDecimal pTime);
+
 	void setMessages(String pMessage);
-	
+
+	boolean isGroupCodeNull();
+
+	boolean isIdxNull();
+
 	boolean isDeleteTargetTableRows();
 
 }

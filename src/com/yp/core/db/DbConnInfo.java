@@ -1,19 +1,20 @@
 package com.yp.core.db;
 
-public class DbConninfo {
-	
-	private String key;
-	private String name;
-	private String dbDriver;
-	private String dbPassword;
-	private String dbSeperator;
-	private String dbUrl;
-	private String dbUser;
-	
-	public DbConninfo(String pKey, String pLabel) {
+public class DbConnInfo {
+
+	protected String key;
+	protected String value;
+	protected String dbDriver;
+	protected String dbPassword;
+	protected String dbSeperator;
+	protected String dbUrl;
+	protected String dbUser;
+	protected boolean defaultDb;
+
+	public DbConnInfo(String pKey, String pValue) {
 		super();
 		key = pKey;
-		name = pLabel;
+		value = pValue;
 	}
 
 	public String getKey() {
@@ -24,12 +25,12 @@ public class DbConninfo {
 		key = pKey;
 	}
 
-	public String getName() {
-		return name;
+	public String getValue() {
+		return value;
 	}
 
-	public void setName(String pName) {
-		name = pName;
+	public void setValue(String pValue) {
+		value = pValue;
 	}
 
 	public String getDbDriver() {
@@ -71,6 +72,25 @@ public class DbConninfo {
 	public void setDbUser(String pDbUser) {
 		dbUser = pDbUser;
 	}
-	
 
+	public boolean isDefaultDb() {
+		return defaultDb;
+	}
+
+	public void setDefaultDb(boolean pDefaultdb) {
+		defaultDb = pDefaultdb;
+	}
+
+	@Override
+	public boolean equals(final Object obj) {
+		if (obj instanceof DbConnInfo) {
+			return getKey().equals(((DbConnInfo) obj).getKey());
+		}
+		return super.equals(obj);
+	}
+	
+	@Override
+	public String toString() {
+		return getValue();
+	}
 }

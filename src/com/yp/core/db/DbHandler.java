@@ -63,9 +63,9 @@ public class DbHandler<T> implements IHandler<T> {
 
 	private Connection connection;
 
-	private List<String> paramList;
+	private ArrayList<String> paramList;
 
-	private List<Object> valueList;
+	private ArrayList<Object> valueList;
 
 	private int fieldCount = 0;
 	private String[] fieldNames;
@@ -75,8 +75,8 @@ public class DbHandler<T> implements IHandler<T> {
 	private Class<? extends AModel<T>> callerClass;
 
 	private String schemaSeperator = ".";
-	private Properties config;
 	private Properties schemas;
+	private Properties config;
 	private DataSource dataSource;
 	private String url;
 
@@ -234,7 +234,7 @@ public class DbHandler<T> implements IHandler<T> {
 	}
 
 	private List<IDataEntity> readAny(Type pOutType) {
-		List<IDataEntity> list = null;
+		ArrayList<IDataEntity> list = null;
 		if (connection != null) {
 			try (PreparedStatement ps = connection.prepareStatement(query);) {
 				for (int i = 0; i < paramList.size(); i++) {
@@ -261,6 +261,7 @@ public class DbHandler<T> implements IHandler<T> {
 				if (closed)
 					connection = getConnection();
 				list = (List) readAny(getTypeParameterClass());
+
 			} catch (SQLException e) {
 				Logger.getLogger(MyLogger.NAME).log(Level.SEVERE, e.getMessage(), e);
 			} finally {
@@ -638,11 +639,11 @@ public class DbHandler<T> implements IHandler<T> {
 	private void checkAndGeneratePk(IDataEntity pEntity) {
 		try {
 			clear();
-			List<String> pkList = new ArrayList<>();
+			ArrayList<String> pkList = new ArrayList<>();
 			if (pEntity.getPrimaryKeys().size() > 0) {
 				query = generatePkQuery(pEntity, pkList);
 				if (query != null) {
-					IDataEntity vs = findPk(query, pEntity.getClass());
+					IDataEntity vs = findPk(query);
 					for (String key : pkList) {
 						if (vs != null && !vs.isNull(key))
 							pEntity.set(key, vs.get(key));
@@ -656,7 +657,7 @@ public class DbHandler<T> implements IHandler<T> {
 		}
 	}
 
-	public IDataEntity findPk(String pQuery, Type pOutType) {
+	public IDataEntity findPk(String pQuery) {
 		IDataEntity de = null;
 		if (pQuery != null) {
 			query = pQuery;
@@ -664,9 +665,7 @@ public class DbHandler<T> implements IHandler<T> {
 			try {
 				if (closed)
 					connection = getConnection();
-				de = readOne(pOutType);
-				if (de != null)
-					de.checkValues();
+				de = readOne(DataEntity.class);
 			} catch (SQLException e) {
 				Logger.getLogger(MyLogger.NAME).log(Level.SEVERE, e.getMessage(), e);
 			} finally {
@@ -804,8 +803,8 @@ public class DbHandler<T> implements IHandler<T> {
 			}
 		query = pQuery.getQuery().replace(REGEX_SCHEMA_SEPERATOR, schemaSeperator);
 		for (Iterator<Entry<Object, Object>> iterator = schemas.entrySet().iterator(); iterator.hasNext();) {
-			Entry<Object, Object> e = iterator.next();
-			query = query.replaceAll((String) e.getKey(), (String) e.getValue());
+			Entry<Object, Object> e =  iterator.next();
+			query = query.replaceAll((String)e.getKey(), (String)e.getValue());
 		}
 	}
 
@@ -860,7 +859,7 @@ public class DbHandler<T> implements IHandler<T> {
 		return getConnection();
 	}
 
-	public Connection getConnection(DbConninfo pConnconf) throws SQLException {
+	public Connection getConnection(DbConnInfo pConnconf) throws SQLException {
 		Properties config1 = new Properties();
 		config1.setProperty(USER, pConnconf.getDbUser());
 		config1.setProperty(PWD, decrypt(pConnconf.getDbPassword()));
@@ -962,7 +961,7 @@ public class DbHandler<T> implements IHandler<T> {
 	}
 
 	@Override
-	public IResult<AXlsAktar> transferToXls(DbCommand pQuery, Type pOutType, AXlsAktar pXls) {
+	public IResult<AXlsAktar> exportToXls(DbCommand pQuery, Type pOutType, AXlsAktar pXls) {
 		IResult<AXlsAktar> res = new Result<>();
 		List<IDataEntity> list = findAny(pQuery, pOutType);
 		if (!BaseConstants.isEmpty(list)) {
@@ -973,7 +972,7 @@ public class DbHandler<T> implements IHandler<T> {
 		return res;
 	}
 
-	public List<IDataEntity> findDbTables(String pLibrary, String pSchema) {
+	public ArrayList<IDataEntity> findDbTables(String pLibrary, String pSchema) {
 		try {
 			connection = getConnection();
 			if (connection != null) {
@@ -990,10 +989,10 @@ public class DbHandler<T> implements IHandler<T> {
 		return null;
 	}
 
-	public IResult<ITransfer> transferDb(DbConninfo pTarget, ITransfer pTransfer, OnExportListener proceedListener) {
+	public IResult<IExport> exportDb(DbConnInfo pTarget, IExport pTransfer, OnExportListener proceedListener) {
 		Connection targetConn = null;
 		Integer count = 0;
-		IResult<ITransfer> res = new Result<>(false, BaseConstants.MESSAGE_DATA_TRANSFER_ERROR);
+		IResult<IExport> res = new Result<>(false, BaseConstants.MESSAGE_DATA_TRANSFER_ERROR);
 		try {
 			connection = getConnection();
 			connection.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
@@ -1003,8 +1002,7 @@ public class DbHandler<T> implements IHandler<T> {
 
 				String sourceQuery = pTransfer.getQuery();
 				String souceTable = pTransfer.getSourceSchema() + schemaSeperator + pTransfer.getSourceTable();
-				String targetTable = pTransfer.getTargetSchema() + pTarget.getDbSeperator()
-						+ pTransfer.getTargetTable();
+				String targetTable = pTransfer.getTargetSchema() + pTarget.getDbSeperator() + pTransfer.getTargetTable();
 				if (StringTool.isNull(sourceQuery) || "*".equals(sourceQuery))
 					sourceQuery = SELECT_FROM + souceTable;
 
@@ -1026,9 +1024,9 @@ public class DbHandler<T> implements IHandler<T> {
 								targetPs.execute();
 							}
 						}
-						res = transfer(pTransfer, targetConn, sourceQuery, targetTable, count, proceedListener);
+						res = export(pTransfer, targetConn, sourceQuery, targetTable, count, proceedListener);
 					} else {
-						res.setMessage(String.format(FORMATED_EXPORT_MESSAGE, pTransfer.getTransferId(),
+						res.setMessage(String.format(FORMATED_EXPORT_MESSAGE, pTransfer.getExportId(),
 								BaseConstants.MESSAGE_DATA_TRANSFER_ERROR_NODATA));
 						res.setSuccess(false);
 
@@ -1036,7 +1034,7 @@ public class DbHandler<T> implements IHandler<T> {
 				}
 			}
 		} catch (SQLException e) {
-			String msg = String.format(FORMATED_EXPORT_MESSAGE, pTransfer.getTransferId(),
+			String msg = String.format(FORMATED_EXPORT_MESSAGE, pTransfer.getExportId(),
 					BaseConstants.MESSAGE_DATA_TRANSFER_ERROR);
 			res.setMessage(msg);
 			res.setSuccess(false);
@@ -1053,7 +1051,7 @@ public class DbHandler<T> implements IHandler<T> {
 	private static final String FORMATED_EXPORT_MESSAGE = "%s: %s";
 	private static final String FORMATED_EXPORT_MESSAGE2 = "%s: %s%s";
 
-	private IResult<ITransfer> transfer(ITransfer pTransfer, Connection targetConn, String sourceQuery,
+	private IResult<IExport> export(IExport pTransfer, Connection targetConn, String sourceQuery,
 			String targetTable, Integer count, OnExportListener proceedListener) throws SQLException {
 		final String msgExportStarts = BaseConstants.getString("DbHandler.Transfer.Starts");
 		final String msgExportSaves = BaseConstants.getString("DbHandler.Transfer.Saves");
@@ -1061,7 +1059,7 @@ public class DbHandler<T> implements IHandler<T> {
 		final String msgExportEnds = BaseConstants.getString("DbHandler.Transfer.Ends");
 		final String msgExportProceeds = "...";
 
-		IResult<ITransfer> res = new Result<>(false, BaseConstants.MESSAGE_DATA_TRANSFER_ERROR);
+		IResult<IExport> res = new Result<>(false, BaseConstants.MESSAGE_DATA_TRANSFER_ERROR);
 
 		Double batchSize = 1000.0;
 		Double progres = 0.0;
@@ -1084,7 +1082,7 @@ public class DbHandler<T> implements IHandler<T> {
 			try (PreparedStatement targetPs = targetConn.prepareStatement(targetQuery)) {
 				int i = 0;
 				proceedListener.onProceed(PHASE.STARTS, 0.0, count,
-						String.format(FORMATED_EXPORT_MESSAGE, pTransfer.getTransferId(), msgExportStarts));
+						String.format(FORMATED_EXPORT_MESSAGE, pTransfer.getExportId(), msgExportStarts));
 				while (rs.next()) {
 					i++;
 					for (int dJ = 1; dJ <= colomnCount; dJ++) {
@@ -1098,30 +1096,30 @@ public class DbHandler<T> implements IHandler<T> {
 
 					if (i % batchSize == batchSize - 1) {
 						proceedListener.onProceed(PHASE.SAVE_BEFORE, progres, i,
-								String.format(FORMATED_EXPORT_MESSAGE, pTransfer.getTransferId(), msgExportSaves));
+								String.format(FORMATED_EXPORT_MESSAGE, pTransfer.getExportId(), msgExportSaves));
 
 						targetPs.executeBatch();
 						proceedListener.onProceed(PHASE.SAVE_AFTER, progres, i,
-								String.format(FORMATED_EXPORT_MESSAGE2, pTransfer.getTransferId(), i, msgExportSaved));
+								String.format(FORMATED_EXPORT_MESSAGE2, pTransfer.getExportId(), i, msgExportSaved));
 
 					}
 					if (i % div == div - 1) {
 						progres += ratio;
 						proceedListener.onProceed(PHASE.PROCEED, progres, i,
-								String.format(FORMATED_EXPORT_MESSAGE, pTransfer.getTransferId(), msgExportProceeds));
+								String.format(FORMATED_EXPORT_MESSAGE, pTransfer.getExportId(), msgExportProceeds));
 
 					}
 				}
 				if (i % batchSize != 0) {
 					proceedListener.onProceed(PHASE.SAVE_BEFORE, progres, i,
-							String.format(FORMATED_EXPORT_MESSAGE, pTransfer.getTransferId(), msgExportSaves));
+							String.format(FORMATED_EXPORT_MESSAGE, pTransfer.getExportId(), msgExportSaves));
 
 					targetPs.executeBatch();
 					proceedListener.onProceed(PHASE.SAVE_AFTER, progres, i,
-							String.format(FORMATED_EXPORT_MESSAGE2, pTransfer.getTransferId(), i, msgExportSaved));
+							String.format(FORMATED_EXPORT_MESSAGE2, pTransfer.getExportId(), i, msgExportSaved));
 
 				}
-				String msg = String.format(FORMATED_EXPORT_MESSAGE2, pTransfer.getTransferId(), count, msgExportEnds);
+				String msg = String.format(FORMATED_EXPORT_MESSAGE2, pTransfer.getExportId(), count, msgExportEnds);
 				proceedListener.onProceed(PHASE.ENDS, (double) count, count, msg);
 
 				res.setSuccess(true);
