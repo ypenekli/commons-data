@@ -377,9 +377,9 @@ public abstract class AModel<T> {
 		return res;
 	}
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void exportXlsToDb(final String pFileName, IDataEntity[] pTables) {
-		List addList = new ArrayList<>();
+		List<IDataEntity> addList = new ArrayList<>();
 		List<IDataEntity> list = new ArrayList<>();
 
 		String clientName = "11111";
@@ -396,7 +396,7 @@ public abstract class AModel<T> {
 							add.setLastClientInfo(clientName, ckientIp, datetime);
 							addList.add(add);
 						}
-						saveAll(addList);
+						saveAll((List) addList);
 						addList.clear();
 						list.clear();
 					}
@@ -469,6 +469,17 @@ public abstract class AModel<T> {
 		return dYeni;
 	}
 
+	private static String[] readColumunNames(Row row) {
+		java.util.Iterator<Cell> cellIterator = row.cellIterator();
+		List<String> collNameList = new ArrayList<>();
+		while (cellIterator.hasNext()) {
+			collNameList.add(cellIterator.next().getStringCellValue());
+		}
+		String[] collNames = new String[collNameList.size()];
+		collNameList.toArray(collNames);
+		return collNames;
+	}
+
 	public static List<IDataEntity> readFromExcelWorkbook(org.apache.poi.ss.usermodel.Workbook pWorkbook,
 			String pSheetName, final String[] pCollNames, final boolean pHasCollNames,
 			Class<? extends IDataEntity> pClass) {
@@ -482,17 +493,8 @@ public abstract class AModel<T> {
 		if (sheet != null) {
 			Iterator<Row> rowIterator = sheet.iterator();
 			if (rowIterator.hasNext()) {
-				if (pHasCollNames) {
-					Row row = rowIterator.next();
-					if (collNames == null) {
-						java.util.Iterator<Cell> cellIterator = row.cellIterator();
-						List<String> collNameList = new ArrayList<>();
-						while (cellIterator.hasNext()) {
-							collNameList.add(cellIterator.next().getStringCellValue());
-						}
-						collNames = new String[collNameList.size()];
-						collNameList.toArray(collNames);
-					}
+				if (pHasCollNames && collNames == null) {
+					collNames = readColumunNames(rowIterator.next());
 				}
 				while (rowIterator.hasNext()) {
 					res.add(loadCell(rowIterator.next(), collNames, pClass));
