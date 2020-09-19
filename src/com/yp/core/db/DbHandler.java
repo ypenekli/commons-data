@@ -1125,8 +1125,12 @@ public class DbHandler<T> implements IHandler<T> {
 				res.setSuccess(true);
 				res.setData(pTransfer);
 				res.setMessage(msg);
+			}catch (Exception e) {
+				e.printStackTrace();
 			}
 
+		}catch (Exception e) {
+			e.printStackTrace();
 		}
 		return res;
 	}
