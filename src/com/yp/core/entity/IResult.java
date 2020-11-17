@@ -16,7 +16,7 @@ public interface IResult<T> extends Serializable {
 
 	void setData(T pData);
 
-	String getErrorcode();
+	int getErrorcode();
 
-	void setErrorcode(String pErrorcode);
+	void setErrorcode(int pErrorcode);
 }

@@ -42,6 +42,8 @@ public class JsonHandler<T> implements IHandler<T> {
 	private String url, callerClassName;
 	private Class<T> callerClass;
 	protected static final String CLASS_NAME = "className";
+	private static String token = "";
+	private static final String AUTHORIZATION = "Authorization";
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public JsonHandler(String pUrl, Class pCallerClass) {
@@ -51,16 +53,23 @@ public class JsonHandler<T> implements IHandler<T> {
 		callerClassName = callerClass.getSimpleName();
 	}
 
-	private HttpURLConnection getConnection(String pFnName) throws IOException {
-		String query = url + "/" + callerClassName + "/" + pFnName + "/";
-		URL newUrl = new URL(query);
+	private static final String CONN_URL_FORMAT = "%s/%s/%s/";
+	private static final String JSON_FORMAT = "'%s'";
 
+	private HttpURLConnection getConnection(String pFnName) throws IOException {
+		URL newUrl = new URL(String.format(CONN_URL_FORMAT, url, callerClassName, pFnName));
 		HttpURLConnection connection;
 		connection = (HttpURLConnection) newUrl.openConnection();
 		connection.setConnectTimeout(5000);
-		connection.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+		// connection.setRequestProperty("Content-Type", "application/json;
+		// charset=UTF-8");
+		connection.setRequestProperty("Content-Type",
+				"application/json; application/x-www-form-urlencoded; charset=UTF-8");
+		// connection.setRequestProperty("Content-Type",
+		// "application/x-www-form-urlencoded");
 		connection.setRequestProperty("enctype", "multipart/form-data");
 		connection.setRequestProperty("Accept-Encoding", "gzip");
+		connection.setRequestProperty(AUTHORIZATION, token);
 		connection.setDoOutput(true);
 		connection.setDoInput(true);
 		connection.setRequestMethod("POST");
@@ -92,44 +101,45 @@ public class JsonHandler<T> implements IHandler<T> {
 			for (int i = 0; i < pParams.length; i++) {
 				params[i + 1] = pParams[i];
 			}
-		} else {
+		} else
 			params = new FnParam[1];
-		}
 
 		Class<T> entityType = getTypeParameterClass();
 		params[0] = new FnParam(CLASS_NAME, getClassName(entityType));
 
-		String in = gson.toJson(params);
+		String in = String.format(JSON_FORMAT, gson.toJson(params));
+
 		HttpURLConnection conn = getConnection(pFnName);
 		// System.out.println("URL :" + conn.getURL().toString() + "/" + in);
+
 		OutputStream os = conn.getOutputStream();
 		os.write(in.getBytes(StandardCharsets.UTF_8));
 		os.flush();
 		os.close();
 
-		InputStream is = conn.getInputStream();
-		// String res = org.apache.commons.io.IOUtils.toString(is,
-		// StandardCharsets.UTF_8);
+		token = conn.getHeaderField(AUTHORIZATION);
+		int responseCode = conn.getResponseCode();
+		List<T> result = null;
+		if (responseCode == HttpURLConnection.HTTP_OK) {
+			InputStream is = conn.getInputStream();
+			// String res = org.apache.commons.io.IOUtils.toString(is,
+			// StandardCharsets.UTF_8);
 
-		String res = getJsonString(is, conn.getContentEncoding());
-
-		Type type = TypeToken.getParameterized(ArrayList.class, entityType).getType();
-
-		ArrayList<T> result = gson.fromJson(res, type);
-
-		is.close();
-		conn.disconnect();
-
-		if (result != null) {
-			int i = 1;
-			for (T e : result) {
-				IDataEntity vs = (IDataEntity) e;
-				vs.checkValues();
-				vs.setRowNum(i);
-				i += 1;
+			String res = getJsonString(is, conn.getContentEncoding());
+			Type type = TypeToken.getParameterized(ArrayList.class, entityType).getType();
+			result = gson.fromJson(res, type);
+			is.close();
+			if (result != null) {
+				int i = 1;
+				for (T e : result) {
+					IDataEntity vs = (IDataEntity) e;
+					vs.checkValues();
+					vs.setRowNum(i);
+					i += 1;
+				}
 			}
 		}
-
+		conn.disconnect();
 		return result;
 	}
 
@@ -153,35 +163,36 @@ public class JsonHandler<T> implements IHandler<T> {
 
 		params[0] = new FnParam(CLASS_NAME, getClassName(pOutType));
 
-		String in = gson.toJson(params);
+		String in = String.format(JSON_FORMAT, gson.toJson(params));
 		HttpURLConnection conn = getConnection(pFnName);
 		// System.out.println("URL :" + conn.getURL().toString() + "/" + in);
+
 		OutputStream os = conn.getOutputStream();
 		os.write(in.getBytes(StandardCharsets.UTF_8));
 		os.flush();
 		os.close();
 
-		InputStream is = conn.getInputStream();
-		// String res = org.apache.commons.io.IOUtils.toString(is,
-		// StandardCharsets.UTF_8);
-
-		String res = getJsonString(is, conn.getContentEncoding());
-
-		Type type = TypeToken.getParameterized(ArrayList.class, pOutType).getType();
-
-		ArrayList<IDataEntity> result = gson.fromJson(res, type);
-
-		is.close();
-		conn.disconnect();
-
-		if (result != null) {
-			int i = 1;
-			for (IDataEntity vs : result) {
-				vs.checkValues();
-				vs.setRowNum(i);
-				i += 1;
+		token = conn.getHeaderField(AUTHORIZATION);
+		int responseCode = conn.getResponseCode();
+		List<IDataEntity> result = null;
+		if (responseCode == HttpURLConnection.HTTP_OK) {
+			InputStream is = conn.getInputStream();
+			// String res = org.apache.commons.io.IOUtils.toString(is,
+			// StandardCharsets.UTF_8);
+			String res = getJsonString(is, conn.getContentEncoding());
+			Type type = TypeToken.getParameterized(ArrayList.class, pOutType).getType();
+			result = gson.fromJson(res, type);
+			is.close();
+			if (result != null) {
+				int i = 1;
+				for (IDataEntity vs : result) {
+					vs.checkValues();
+					vs.setRowNum(i);
+					i += 1;
+				}
 			}
 		}
+		conn.disconnect();
 		return result;
 	}
 
@@ -205,7 +216,7 @@ public class JsonHandler<T> implements IHandler<T> {
 		Class<T> entityType = getTypeParameterClass();
 		params[0] = new FnParam(CLASS_NAME, getClassName(entityType));
 
-		String in = gson.toJson(params);
+		String in = String.format(JSON_FORMAT, gson.toJson(params));
 		HttpURLConnection conn = getConnection(pFnName);
 		// System.out.println("URL :" + conn.getURL().toString() + "/" + in);
 		OutputStream os = conn.getOutputStream();
@@ -213,19 +224,20 @@ public class JsonHandler<T> implements IHandler<T> {
 		os.flush();
 		os.close();
 
-		InputStream is = conn.getInputStream();
-
-		// T result = gson.fromJson(new InputStreamReader(is, StandardCharsets.UTF_8),
-		// entityType);
-
-		String res = getJsonString(is, conn.getContentEncoding());
-		T result = gson.fromJson(res, entityType);
-
-		is.close();
+		token = conn.getHeaderField(AUTHORIZATION);
+		int responseCode = conn.getResponseCode();
+		T result = null;
+		if (responseCode == HttpURLConnection.HTTP_OK) {
+			InputStream is = conn.getInputStream();
+			// T result = gson.fromJson(new InputStreamReader(is, StandardCharsets.UTF_8),
+			// entityType);
+			String res = getJsonString(is, conn.getContentEncoding());
+			result = gson.fromJson(res, entityType);
+			is.close();
+			if (result != null)
+				((IDataEntity) result).checkValues();
+		}
 		conn.disconnect();
-
-		if (result != null)
-			((IDataEntity) result).checkValues();
 
 		return result;
 	}
@@ -237,16 +249,17 @@ public class JsonHandler<T> implements IHandler<T> {
 		return (Class<T>) paramType.getActualTypeArguments()[0];
 	}
 
-	public T downloadFromServer(String pFnName, T pIn) throws IOException {
+	public T downloadFromServer(String pFnName, T params) throws IOException {
 
 		GsonBuilder gb = new GsonBuilder();
 		// gb.registerTypeAdapter(IElement.class, new ElementSerializer());
 		gb.setFieldNamingPolicy(FieldNamingPolicy.IDENTITY);
 
 		Gson gson = gb.create();
-		String in = gson.toJson(pIn);
-
+		// String in = gson.toJson(pIn);
+		String in = String.format(JSON_FORMAT, gson.toJson(params));
 		HttpURLConnection conn = getConnection(pFnName);
+
 		OutputStream os = conn.getOutputStream();
 
 		os.write(in.getBytes(StandardCharsets.UTF_8));
@@ -254,18 +267,21 @@ public class JsonHandler<T> implements IHandler<T> {
 
 		Class<T> entityType = getTypeParameterClass();
 
-		InputStream is = conn.getInputStream();
-		// T result = gson.fromJson(new InputStreamReader(is, StandardCharsets.UTF_8),
-		// entityType);
-
-		String res = getJsonString(is, conn.getContentEncoding());
-		T result = gson.fromJson(res, entityType);
-
-		is.close();
+		token = conn.getHeaderField(AUTHORIZATION);
+		int responseCode = conn.getResponseCode();
+		T result = null;
+		if (responseCode == HttpURLConnection.HTTP_OK) {
+			InputStream is = conn.getInputStream();
+			// T result = gson.fromJson(new InputStreamReader(is, StandardCharsets.UTF_8),
+			// entityType);
+			String res = getJsonString(is, conn.getContentEncoding());
+			result = gson.fromJson(res, entityType);
+			is.close();
+			if (result != null)
+				((IDataEntity) result).checkValues();
+		}
 		conn.disconnect();
 
-		if (result != null)
-			((IDataEntity) result).checkValues();
 		return result;
 	}
 
@@ -288,39 +304,39 @@ public class JsonHandler<T> implements IHandler<T> {
 
 		params[0] = new FnParam(CLASS_NAME, getClassName(pOutType));
 
-		String in = gson.toJson(params);
+		String in = String.format(JSON_FORMAT, gson.toJson(params));
 
 		HttpURLConnection conn = getConnection(pFnName);
 		OutputStream os = conn.getOutputStream();
 		os.write(in.getBytes(StandardCharsets.UTF_8));
 		os.flush();
 		os.close();
-
-		InputStream is = conn.getInputStream();
-
-		// IDataEntity result = gson.fromJson(new InputStreamReader(is,
-		// StandardCharsets.UTF_8), pOutType);
-
-		String res = getJsonString(is, conn.getContentEncoding());
-		IDataEntity result = gson.fromJson(res, pOutType);
-
-		is.close();
+		token = conn.getHeaderField(AUTHORIZATION);
+		int responseCode = conn.getResponseCode();
+		IDataEntity result = null;
+		if (responseCode == HttpURLConnection.HTTP_OK) {
+			InputStream is = conn.getInputStream();
+			// IDataEntity result = gson.fromJson(new InputStreamReader(is,
+			// StandardCharsets.UTF_8), pOutType);
+			String res = getJsonString(is, conn.getContentEncoding());
+			result = gson.fromJson(res, pOutType);
+			is.close();
+			if (result != null)
+				result.checkValues();
+		}
 		conn.disconnect();
-
-		if (result != null)
-			result.checkValues();
 
 		return result;
 	}
 
-	public IResult<List<T>> executeAtServer(String pFnName, List<T> pListIn) throws IOException {
+	public IResult<List<T>> executeAtServer(String pFnName, List<T> params) throws IOException {
 
 		GsonBuilder gb = new GsonBuilder();
 		// gb.registerTypeAdapter(IElement.class, new ElementSerializer());
 		gb.setFieldNamingPolicy(FieldNamingPolicy.IDENTITY);
 
 		Gson gson = gb.create();
-		String in = gson.toJson(pListIn);
+		String in = String.format(JSON_FORMAT, gson.toJson(params));
 
 		HttpURLConnection conn = getConnection(pFnName);
 		OutputStream os = conn.getOutputStream();
@@ -329,37 +345,42 @@ public class JsonHandler<T> implements IHandler<T> {
 		os.close();
 
 		Type type = DataEntity.class;
-		if (!pListIn.isEmpty()) {
-			type = pListIn.get(0).getClass();
+		if (!params.isEmpty()) {
+			type = params.get(0).getClass();
 		}
 
 		Type entityType = TypeToken
 				.getParameterized(Result.class, TypeToken.getParameterized(ArrayList.class, type).getType()).getType();
-
-		InputStream is = conn.getInputStream();
-		// String out = org.apache.commons.io.IOUtils.toString(is,
-		// StandardCharsets.UTF_8);
-
-		String out = getJsonString(is, conn.getContentEncoding());
-		Result<List<T>> result = gson.fromJson(out, entityType);
-		is.close();
+		token = conn.getHeaderField(AUTHORIZATION);
+		int responseCode = conn.getResponseCode();
+		Result<List<T>> result = null;
+		if (responseCode == HttpURLConnection.HTTP_OK) {
+			InputStream is = conn.getInputStream();
+			// String out = org.apache.commons.io.IOUtils.toString(is,
+			// StandardCharsets.UTF_8);
+			String out = getJsonString(is, conn.getContentEncoding());
+			result = gson.fromJson(out, entityType);
+			is.close();
+			if (result != null && result.getData() != null)
+				for (T e : result.getData()) {
+					((IDataEntity) e).checkValues();
+				}
+		} else {
+			result = new Result<>(false, BaseConstants.MESSAGE_LOGIN_ERROR);
+		}
 		conn.disconnect();
-		if (result != null && result.getData() != null)
-			for (T e : result.getData()) {
-				((IDataEntity) e).checkValues();
-			}
-
 		return result;
 	}
 
-	public IResult<String> executeAtServer(String pFnName, FnParam[] pIn) throws IOException {
+	public IResult<String> executeAtServer(String pFnName, FnParam[] params) throws IOException {
 
 		GsonBuilder gb = new GsonBuilder();
 		// gb.registerTypeAdapter(IElement.class, new ElementSerializer());
 		gb.setFieldNamingPolicy(FieldNamingPolicy.IDENTITY);
 
 		Gson gson = gb.create();
-		String in = gson.toJson(pIn);
+		// String in = gson.toJson(pIn);
+		String in = String.format(JSON_FORMAT, gson.toJson(params));
 
 		HttpURLConnection conn = getConnection(pFnName);
 		OutputStream os = conn.getOutputStream();
@@ -369,121 +390,140 @@ public class JsonHandler<T> implements IHandler<T> {
 
 		Type entityType = new TypeToken<Result<String>>() {
 		}.getType();
-
-		InputStream is = conn.getInputStream();
-		// String out = org.apache.commons.io.IOUtils.toString(is,
-		// StandardCharsets.UTF_8);
-		String out = getJsonString(is, conn.getContentEncoding());
-
-		IResult<String> result = gson.fromJson(out, entityType);
-
-		is.close();
+		token = conn.getHeaderField(AUTHORIZATION);
+		int responseCode = conn.getResponseCode();
+		IResult<String> result = null;
+		if (responseCode == HttpURLConnection.HTTP_OK) {
+			InputStream is = conn.getInputStream();
+			// String out = org.apache.commons.io.IOUtils.toString(is,
+			// StandardCharsets.UTF_8);
+			String out = getJsonString(is, conn.getContentEncoding());
+			result = gson.fromJson(out, entityType);
+			is.close();
+		} else {
+			result = new Result<String>(false, BaseConstants.MESSAGE_LOGIN_ERROR);
+		}
 		conn.disconnect();
-
 		return result;
 	}
 
-	public IResult<T> executeAtServer(String pFnName, FnParam[] pIn, Class<T> pOut) throws IOException {
-
+	public IResult<T> executeAtServer(String pFnName, Class<T> pOut, FnParam... pParams) throws IOException {
 		GsonBuilder gb = new GsonBuilder();
 		// gb.registerTypeAdapter(IElement.class, new ElementSerializer());
 		gb.setFieldNamingPolicy(FieldNamingPolicy.IDENTITY);
-
 		Gson gson = gb.create();
-		String in = gson.toJson(pIn);
 
+		FnParam[] params;
+		if (pParams != null && pParams.length > 0) {
+			params = new FnParam[pParams.length + 1];
+			for (int i = 0; i < pParams.length; i++) {
+				params[i + 1] = pParams[i];
+			}
+		} else
+			params = new FnParam[1];
+
+		params[0] = new FnParam(CLASS_NAME, getClassName(pOut));
+
+		String in = String.format(JSON_FORMAT, gson.toJson(params));
 		HttpURLConnection conn = getConnection(pFnName);
 		OutputStream os = conn.getOutputStream();
-
 		os.write(in.getBytes(StandardCharsets.UTF_8));
 		os.close();
-
 		Type entityType = TypeToken.getParameterized(Result.class, pOut).getType();
 
-		InputStream is = conn.getInputStream();
-		// String out = org.apache.commons.io.IOUtils.toString(is,
-		// StandardCharsets.UTF_8);
-
-		String out = getJsonString(is, conn.getContentEncoding());
-		IResult<T> result = gson.fromJson(out, entityType);
-
-		is.close();
+		token = conn.getHeaderField(AUTHORIZATION);
+		int responseCode = conn.getResponseCode();
+		IResult<T> result = null;
+		if (responseCode == HttpURLConnection.HTTP_OK) {
+			InputStream is = conn.getInputStream();
+			String out = getJsonString(is, conn.getContentEncoding());
+			result = gson.fromJson(out, entityType);
+			is.close();
+			if (result != null && result.getData() != null)
+				((IDataEntity) result.getData()).checkValues();
+		} else {
+			result = new Result<>(false, BaseConstants.MESSAGE_LOGIN_ERROR);
+		}
 		conn.disconnect();
-
-		if (result != null && result.getData() != null)
-			((IDataEntity) result.getData()).checkValues();
 		return result;
 	}
 
-	public IResult<T> executeAtServer(String pFnName, T pIn) throws IOException {
+	public IResult<T> executeAtServer(String pFnName, T params) throws IOException {
 		GsonBuilder gb = new GsonBuilder();
 		// gb.registerTypeAdapter(IElement.class, new ElementSerializer());
 		gb.setFieldNamingPolicy(FieldNamingPolicy.IDENTITY);
 
 		Gson gson = gb.create();
-		String in = gson.toJson(pIn);
+		// String in = gson.toJson(pIn);
+		String in = String.format(JSON_FORMAT, gson.toJson(params));
+
+		HttpURLConnection conn = getConnection(pFnName);
+		OutputStream os = conn.getOutputStream();
+		os.write(in.getBytes(StandardCharsets.UTF_8));
+		os.close();
+
+		Type entityType = TypeToken.getParameterized(Result.class, params.getClass()).getType();
+		token = conn.getHeaderField(AUTHORIZATION);
+		int responseCode = conn.getResponseCode();
+		IResult<T> result = null;
+		if (responseCode == HttpURLConnection.HTTP_OK) {
+			InputStream is = conn.getInputStream();
+			// String out = org.apache.commons.io.IOUtils.toString(is,
+			// StandardCharsets.UTF_8);
+			String out = getJsonString(is, conn.getContentEncoding());
+			result = gson.fromJson(out, entityType);
+			is.close();
+			if (result != null && result.getData() != null)
+				((IDataEntity) result.getData()).checkValues();
+		} else {
+			result = new Result<>(false, BaseConstants.MESSAGE_LOGIN_ERROR);
+		}
+		conn.disconnect();
+		return result;
+	}
+
+	public IResult<IDataEntity> executeAtServer(String pFnName, IDataEntity params) throws IOException {
+		GsonBuilder gb = new GsonBuilder();
+		// gb.registerTypeAdapter(IElement.class, new ElementSerializer());
+		gb.setFieldNamingPolicy(FieldNamingPolicy.IDENTITY);
+
+		Gson gson = gb.create();
+		// String in = gson.toJson(pIn);
+		String in = String.format(JSON_FORMAT, gson.toJson(params));
 
 		HttpURLConnection conn = getConnection(pFnName);
 		OutputStream os = conn.getOutputStream();
 
 		os.write(in.getBytes(StandardCharsets.UTF_8));
 		os.close();
-
-		Type entityType = TypeToken.getParameterized(Result.class, pIn.getClass()).getType();
-
-		InputStream is = conn.getInputStream();
-		// String out = org.apache.commons.io.IOUtils.toString(is,
-		// StandardCharsets.UTF_8);
-		String out = getJsonString(is, conn.getContentEncoding());
-		IResult<T> result = gson.fromJson(out, entityType);
-		is.close();
+		Type entityType = TypeToken.getParameterized(Result.class, params.getClass()).getType();
+		token = conn.getHeaderField(AUTHORIZATION);
+		int responseCode = conn.getResponseCode();
+		IResult<IDataEntity> result = null;
+		if (responseCode == HttpURLConnection.HTTP_OK) {
+			InputStream is = conn.getInputStream();
+			// String out = org.apache.commons.io.IOUtils.toString(is,
+			// StandardCharsets.UTF_8);
+			String out = getJsonString(is, conn.getContentEncoding());
+			result = gson.fromJson(out, entityType);
+			is.close();
+			if (result != null && result.getData() != null)
+				result.getData().checkValues();
+		} else {
+			result = new Result<>(false, BaseConstants.MESSAGE_LOGIN_ERROR);
+		}
 		conn.disconnect();
-
-		if (result != null && result.getData() != null)
-			((IDataEntity) result.getData()).checkValues();
-
 		return result;
 	}
 
-	public IResult<IDataEntity> executeAtServer(String pFnName, IDataEntity pIn) throws IOException {
-
+	public List<IDataEntity> uploadToServer(String pFnName, IDataEntity params, Type pOut) throws IOException {
 		GsonBuilder gb = new GsonBuilder();
 		// gb.registerTypeAdapter(IElement.class, new ElementSerializer());
 		gb.setFieldNamingPolicy(FieldNamingPolicy.IDENTITY);
 
 		Gson gson = gb.create();
-		String in = gson.toJson(pIn);
-
-		HttpURLConnection conn = getConnection(pFnName);
-		OutputStream os = conn.getOutputStream();
-
-		os.write(in.getBytes(StandardCharsets.UTF_8));
-		os.close();
-
-		Type entityType = TypeToken.getParameterized(Result.class, pIn.getClass()).getType();
-
-		InputStream is = conn.getInputStream();
-		// String out = org.apache.commons.io.IOUtils.toString(is,
-		// StandardCharsets.UTF_8);
-
-		String out = getJsonString(is, conn.getContentEncoding());
-		IResult<IDataEntity> result = gson.fromJson(out, entityType);
-		is.close();
-		conn.disconnect();
-
-		if (result != null && result.getData() != null)
-			result.getData().checkValues();
-		return result;
-	}
-
-	public List<IDataEntity> uploadToServer(String pFnName, IDataEntity pIn, Type pOut) throws IOException {
-
-		GsonBuilder gb = new GsonBuilder();
-		// gb.registerTypeAdapter(IElement.class, new ElementSerializer());
-		gb.setFieldNamingPolicy(FieldNamingPolicy.IDENTITY);
-
-		Gson gson = gb.create();
-		String in = gson.toJson(pIn);
+		// String in = gson.toJson(pIn);
+		String in = String.format(JSON_FORMAT, gson.toJson(params));
 
 		HttpURLConnection conn = getConnection(pFnName);
 		OutputStream os = conn.getOutputStream();

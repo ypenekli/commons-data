@@ -6,7 +6,8 @@ public class Result<T> implements IResult<T> {
 
 	protected boolean success;
 
-	protected String message, errorcode;
+	protected String message;
+	protected int errorcode;
 
 	protected T data;
 
@@ -51,12 +52,12 @@ public class Result<T> implements IResult<T> {
 	}
 
 	@Override
-	public String getErrorcode() {
+	public int getErrorcode() {
 		return errorcode;
 	}
 
 	@Override
-	public void setErrorcode(String pErrorcode) {
+	public void setErrorcode(int pErrorcode) {
 		errorcode = pErrorcode;
 	}
 }

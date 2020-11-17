@@ -39,14 +39,14 @@ public class BaseConstants {
 	private static final String config_url = "/core/config/Config.properties";	
 	public static final ResourceBundle BUNDLE_MESSAGE = ResourceBundle.getBundle("core.config.Messages");
 
-	public static final String ERRORCODE_CONNECTION = "10000";
-	public static final String ERRORCODE_NO_USER = "10001";
-	public static final String ERRORCODE_WRONG_PASS = "10002";
-	public static final String ERRORCODE_SAVE = "10003";
-	public static final String ERRORCODE_DELETE = "10004";
-	public static final String ERRORCODE_ADD = "10005";
-	public static final String ERRORCODE_TRANSFER = "10006";
-	public static final String ERRORCODE_READ = "10007";
+	public static final int ERRORCODE_CONNECTION = 10000;
+	public static final int ERRORCODE_NO_USER = 10001;
+	public static final int ERRORCODE_WRONG_PASS = 10002;
+	public static final int ERRORCODE_SAVE = 10003;
+	public static final int ERRORCODE_DELETE = 10004;
+	public static final int ERRORCODE_ADD = 10005;
+	public static final int ERRORCODE_TRANSFER = 10006;
+	public static final int ERRORCODE_READ = 10007;
 	public static final String MESSAGE_SAVE_SUCCEEDED;
 	public static final String MESSAGE_ADD_SUCCEEDED;
 	public static final String MESSAGE_ADD_ROLE_SUCCEEDED;

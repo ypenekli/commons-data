@@ -474,7 +474,9 @@ public class DbHandler<T> implements IHandler<T> {
 		try (PreparedStatement ps = connection.prepareStatement(query)) {
 			ParameterMetaData pm = ps.getParameterMetaData();
 			setParameters(ps, pm);
-			if (ps.execute()) {
+			ps.execute();
+			int count = ps.getUpdateCount();
+			if (count == -1 || count > 0) {
 				result.setSuccess(true);
 				result.setMessage(BaseConstants.MESSAGE_SAVE_SUCCEEDED);
 			} else {
