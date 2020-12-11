@@ -695,14 +695,14 @@ public class DbHandler<T> implements IHandler<T> {
 			config.setProperty(PWD, decrypt(pPassword));
 	}
 
-	public static String decrypt(String pMetin) {
-		StringEncrypter se = new StringEncrypter(TEST);
-		return se.decrypt(pMetin);
+	public static String decrypt(String pString) {
+		StringEncrypter se = new StringEncrypter(TEST);		
+		return se.decrypt(pString);
 	}
 
-	public static String encrypt(String pMetin) {
-		StringEncrypter se = new StringEncrypter(TEST);
-		return se.encrypt(pMetin);
+	public static String encrypt(String pString) {
+		StringEncrypter se = new StringEncrypter(TEST);		
+		return se.encrypt(pString);
 	}
 
 	private void generateSellectCommand(IDataEntity pDataEntity) {

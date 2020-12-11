@@ -87,7 +87,8 @@ public class JsonHandler<T> implements IHandler<T> {
 		return json;
 	}
 
-	public List<T> downloadAnyFromServer(String pFnName, FnParam[] pParams) throws IOException {
+	//downloadAnyFromServer
+	public List<T> getAny(String pFnName, FnParam[] pParams) throws IOException {
 
 		GsonBuilder gb = new GsonBuilder();
 		// gb.registerTypeAdapter(IElement.class, new ElementSerializer());
@@ -143,7 +144,8 @@ public class JsonHandler<T> implements IHandler<T> {
 		return result;
 	}
 
-	public List<IDataEntity> downloadAnyFromServer(String pFnName, Type pOutType, FnParam... pParams)
+	//downloadAnyFromServer
+	public List<IDataEntity> getAny(String pFnName, Type pOutType, FnParam... pParams)
 			throws IOException {
 
 		GsonBuilder gb = new GsonBuilder();
@@ -196,7 +198,8 @@ public class JsonHandler<T> implements IHandler<T> {
 		return result;
 	}
 
-	public T downloadFromServer(String pFnName, FnParam... pParams) throws IOException {
+	//downloadFromServer
+	public T getOne(String pFnName, FnParam... pParams) throws IOException {
 
 		GsonBuilder gb = new GsonBuilder();
 		// gb.registerTypeAdapter(IElement.class, new ElementSerializer());
@@ -249,7 +252,8 @@ public class JsonHandler<T> implements IHandler<T> {
 		return (Class<T>) paramType.getActualTypeArguments()[0];
 	}
 
-	public T downloadFromServer(String pFnName, T params) throws IOException {
+	//downloadFromServer
+	public T getOne(String pFnName, T params) throws IOException {
 
 		GsonBuilder gb = new GsonBuilder();
 		// gb.registerTypeAdapter(IElement.class, new ElementSerializer());
@@ -285,7 +289,8 @@ public class JsonHandler<T> implements IHandler<T> {
 		return result;
 	}
 
-	public IDataEntity downloadFromServer(String pFnName, Type pOutType, FnParam... pParams) throws IOException {
+	//downloadFromServer
+	public IDataEntity getOne(String pFnName, Type pOutType, FnParam... pParams) throws IOException {
 
 		GsonBuilder gb = new GsonBuilder();
 		// gb.registerTypeAdapter(IElement.class, new ElementSerializer());
@@ -329,7 +334,8 @@ public class JsonHandler<T> implements IHandler<T> {
 		return result;
 	}
 
-	public IResult<List<T>> executeAtServer(String pFnName, List<T> params) throws IOException {
+	//	executeAtServer
+	public IResult<List<T>> postList(String pFnName, List<T> params) throws IOException {
 
 		GsonBuilder gb = new GsonBuilder();
 		// gb.registerTypeAdapter(IElement.class, new ElementSerializer());
@@ -448,7 +454,8 @@ public class JsonHandler<T> implements IHandler<T> {
 		return result;
 	}
 
-	public IResult<T> executeAtServer(String pFnName, T params) throws IOException {
+	//executeAtServer
+	public IResult<T> postOne(String pFnName, T params) throws IOException {
 		GsonBuilder gb = new GsonBuilder();
 		// gb.registerTypeAdapter(IElement.class, new ElementSerializer());
 		gb.setFieldNamingPolicy(FieldNamingPolicy.IDENTITY);
@@ -482,7 +489,8 @@ public class JsonHandler<T> implements IHandler<T> {
 		return result;
 	}
 
-	public IResult<IDataEntity> executeAtServer(String pFnName, IDataEntity params) throws IOException {
+	//executeAtServer
+	public IResult<IDataEntity> postOne(String pFnName, IDataEntity params) throws IOException {
 		GsonBuilder gb = new GsonBuilder();
 		// gb.registerTypeAdapter(IElement.class, new ElementSerializer());
 		gb.setFieldNamingPolicy(FieldNamingPolicy.IDENTITY);
@@ -567,7 +575,7 @@ public class JsonHandler<T> implements IHandler<T> {
 	public T find(T pDataEntity) {
 		T result = null;
 		try {
-			result = downloadFromServer("find", pDataEntity);
+			result = getOne("find", pDataEntity);
 		} catch (IOException e) {
 			Logger.getLogger(MyLogger.NAME).log(Level.SEVERE, e.getMessage(), e);
 		}
@@ -580,7 +588,7 @@ public class JsonHandler<T> implements IHandler<T> {
 		IDataEntity result = null;
 		String dFnName = "findOne@" + pQuery.getName();
 		try {
-			result = downloadFromServer(dFnName, pOutType, pQuery.getParams());
+			result = getOne(dFnName, pOutType, pQuery.getParams());
 		} catch (IOException e) {
 			Logger.getLogger(MyLogger.NAME).log(Level.SEVERE, e.getMessage(), e);
 		}
@@ -592,7 +600,7 @@ public class JsonHandler<T> implements IHandler<T> {
 	public T findOne(DbCommand pQuery) {
 		String dFnName = "findOne@" + pQuery.getName();
 		try {
-			return downloadFromServer(dFnName, pQuery.getParams());
+			return getOne(dFnName, pQuery.getParams());
 		} catch (IOException e) {
 			Logger.getLogger(MyLogger.NAME).log(Level.SEVERE, e.getMessage(), e);
 		}
@@ -604,7 +612,7 @@ public class JsonHandler<T> implements IHandler<T> {
 		String dFnName = "findBy@" + pQuery.getName();
 		List<IDataEntity> list = null;
 		try {
-			list = downloadAnyFromServer(dFnName, pOutType, pQuery.getParams());
+			list = getAny(dFnName, pOutType, pQuery.getParams());
 		} catch (IOException e) {
 			Logger.getLogger(MyLogger.NAME).log(Level.SEVERE, e.getMessage(), e);
 		}
@@ -616,7 +624,7 @@ public class JsonHandler<T> implements IHandler<T> {
 		String dFnName = "findBy@" + pQuery.getName();
 		List<T> list = null;
 		try {
-			list = downloadAnyFromServer(dFnName, pQuery.getParams());
+			list = getAny(dFnName, pQuery.getParams());
 		} catch (IOException e) {
 			Logger.getLogger(MyLogger.NAME).log(Level.SEVERE, e.getMessage(), e);
 		}
@@ -626,7 +634,7 @@ public class JsonHandler<T> implements IHandler<T> {
 	@Override
 	public IResult<T> save(T pData) {
 		try {
-			return executeAtServer("save", pData);
+			return postOne("save", pData);
 		} catch (IOException e) {
 			Logger.getLogger(MyLogger.NAME).log(Level.SEVERE, e.getMessage(), e);
 		}
@@ -636,7 +644,7 @@ public class JsonHandler<T> implements IHandler<T> {
 	@Override
 	public IResult<IDataEntity> save(IDataEntity pData) {
 		try {
-			return executeAtServer("save", pData);
+			return postOne("save", pData);
 		} catch (IOException e) {
 			Logger.getLogger(MyLogger.NAME).log(Level.SEVERE, e.getMessage(), e);
 		}
@@ -647,7 +655,7 @@ public class JsonHandler<T> implements IHandler<T> {
 	public IResult<List<T>> saveAll(List<T> pData) {
 
 		try {
-			return executeAtServer("saveAll", pData);
+			return postList("saveAll", pData);
 		} catch (IOException e) {
 			Logger.getLogger(MyLogger.NAME).log(Level.SEVERE, e.getMessage(), e);
 		}
