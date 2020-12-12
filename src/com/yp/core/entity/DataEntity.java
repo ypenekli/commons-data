@@ -342,6 +342,18 @@ public class DataEntity implements IDataEntity {
 			setField(pFieldName, pFormat.format(temp), false);
 	}
 
+	public void checkString(String pFieldName) {
+		Object temp = get(pFieldName);
+		if (temp != null) {
+			String str;
+			if (!(temp instanceof String))
+				str = temp.toString();
+			else
+				str = (String) temp;
+			setField(pFieldName, str.trim(), false);
+		}
+	}
+
 	public void checkBlob(String pFieldName) {
 //		Object temp = get(pFieldName);
 //		if (temp != null && !(temp instanceof Blob))

@@ -452,7 +452,7 @@ public abstract class AModel<T> {
 		return remotingEnabled;
 	}
 
-	private static IDataEntity loadCell(Row row, final String[] pCollNames, Class<? extends IDataEntity> pSinif) {
+	private static IDataEntity loadCell(Row row, final String[] pCollNames, Class<? extends IDataEntity> pClass) {
 		Object[] values = new Object[pCollNames.length];
 		for (int dI = 0; dI < pCollNames.length; dI++) {
 			Cell cell = row.getCell(dI);
@@ -463,10 +463,10 @@ public abstract class AModel<T> {
 			else
 				values[dI] = cell.getStringCellValue();
 		}
-		IDataEntity dYeni = EntityFactory.newInstance(pSinif);
-		dYeni.load(pCollNames, values);
-		dYeni.checkValues();
-		return dYeni;
+		IDataEntity newDe = EntityFactory.newInstance(pClass);
+		newDe.load(pCollNames, values);
+		newDe.checkValues();
+		return newDe;
 	}
 
 	private static String[] readColumunNames(Row row) {
