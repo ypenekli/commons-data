@@ -6,10 +6,16 @@ public class DbCommand {
 	private String name;
 	private String query;
 	private FnParam[] params;
+	private Pager pager;
 
 	public DbCommand(final String pName, final FnParam... pParams) {
-		this.name = pName;
-		this.params = pParams;
+		this(pName, new Pager(), pParams);
+	}
+	
+	public DbCommand(final String pName, final Pager pPager, final FnParam... pParams) {
+		name = pName;
+		params = pParams;
+		pager = pPager;
 	}
 
 	public DbCommand(final String pQuery) {
@@ -17,26 +23,34 @@ public class DbCommand {
 	}
 
 	public String getName() {
-		return this.name;
+		return name;
 	}
 
 	public void setName(final String pName) {
-		this.name = pName;
+		name = pName;
 	}
 
 	public FnParam[] getParams() {
-		return this.params;
+		return params;
 	}
 
 	public void setParams(final FnParam... pParams) {
-		this.params = pParams;
+		params = pParams;
 	}
 
 	public String getQuery() {
-		return this.query;
+		return query;
 	}
 
-	public void setQuery(final String query) {
-		this.query = query;
+	public void setQuery(final String pQuery) {
+		query = pQuery;
+	}
+
+	public Pager getPager() {
+		return pager;
+	}
+
+	public void setPager(Pager pPager) {
+		pager = pPager;
 	}
 }

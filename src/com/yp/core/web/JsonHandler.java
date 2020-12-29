@@ -31,8 +31,10 @@ import com.yp.core.db.DbCommand;
 import com.yp.core.db.DbConnInfo;
 import com.yp.core.db.IExport;
 import com.yp.core.db.OnExportListener;
+import com.yp.core.db.Pager;
 import com.yp.core.entity.DataEntity;
 import com.yp.core.entity.IDataEntity;
+import com.yp.core.entity.IElement;
 import com.yp.core.entity.IResult;
 import com.yp.core.entity.Result;
 import com.yp.core.excel.AXlsAktar;
@@ -41,9 +43,10 @@ import com.yp.core.log.MyLogger;
 public class JsonHandler<T> implements IHandler<T> {
 	private String url, callerClassName;
 	private Class<T> callerClass;
-	protected static final String CLASS_NAME = "className";
-	private static String token = "";
+	protected static final String CLASS_NAME = "type";
+	protected static final String PAGER = "pager";
 	private static final String AUTHORIZATION = "Authorization";
+	private static String token = "";
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public JsonHandler(String pUrl, Class pCallerClass) {
@@ -56,23 +59,34 @@ public class JsonHandler<T> implements IHandler<T> {
 	private static final String CONN_URL_FORMAT = "%s/%s/%s/";
 	private static final String JSON_FORMAT = "'%s'";
 
-	private HttpURLConnection getConnection(String pFnName) throws IOException {
+	public enum HTTP_METHOD {
+
+		GET("GET"), POST("POST"), PUT("PUT");
+
+		private String method = null;
+
+		private HTTP_METHOD(String pMethod) {
+			method = pMethod;
+		}
+
+		public String getMehod() {
+			return method;
+		}
+	}
+
+	private HttpURLConnection getConnection(String pFnName, HTTP_METHOD pHttpMethod) throws IOException {
 		URL newUrl = new URL(String.format(CONN_URL_FORMAT, url, callerClassName, pFnName));
 		HttpURLConnection connection;
 		connection = (HttpURLConnection) newUrl.openConnection();
 		connection.setConnectTimeout(5000);
-		// connection.setRequestProperty("Content-Type", "application/json;
-		// charset=UTF-8");
 		connection.setRequestProperty("Content-Type",
 				"application/json; application/x-www-form-urlencoded; charset=UTF-8");
-		// connection.setRequestProperty("Content-Type",
-		// "application/x-www-form-urlencoded");
 		connection.setRequestProperty("enctype", "multipart/form-data");
 		connection.setRequestProperty("Accept-Encoding", "gzip");
 		connection.setRequestProperty(AUTHORIZATION, token);
 		connection.setDoOutput(true);
 		connection.setDoInput(true);
-		connection.setRequestMethod("POST");
+		connection.setRequestMethod(pHttpMethod.getMehod());
 
 		return connection;
 	}
@@ -87,30 +101,31 @@ public class JsonHandler<T> implements IHandler<T> {
 		return json;
 	}
 
-	//downloadAnyFromServer
-	public List<T> getAny(String pFnName, FnParam[] pParams) throws IOException {
+	// downloadAnyFromServer
+	public List<T> getAny(String pFnName, Pager pPager, FnParam[] pParams) throws IOException {
 
 		GsonBuilder gb = new GsonBuilder();
-		// gb.registerTypeAdapter(IElement.class, new ElementSerializer());
+		gb.registerTypeAdapter(IElement.class, new ElementSerializer());
 		gb.setFieldNamingPolicy(FieldNamingPolicy.IDENTITY);
 
 		Gson gson = gb.create();
 
 		FnParam[] params;
 		if (pParams != null && pParams.length > 0) {
-			params = new FnParam[pParams.length + 1];
+			params = new FnParam[pParams.length + 2];
 			for (int i = 0; i < pParams.length; i++) {
-				params[i + 1] = pParams[i];
+				params[i + 2] = pParams[i];
 			}
 		} else
-			params = new FnParam[1];
+			params = new FnParam[2];
 
 		Class<T> entityType = getTypeParameterClass();
 		params[0] = new FnParam(CLASS_NAME, getClassName(entityType));
+		params[1] = new FnParam(PAGER, pPager);
 
 		String in = String.format(JSON_FORMAT, gson.toJson(params));
 
-		HttpURLConnection conn = getConnection(pFnName);
+		HttpURLConnection conn = getConnection(pFnName, HTTP_METHOD.GET);
 		// System.out.println("URL :" + conn.getURL().toString() + "/" + in);
 
 		OutputStream os = conn.getOutputStream();
@@ -144,29 +159,30 @@ public class JsonHandler<T> implements IHandler<T> {
 		return result;
 	}
 
-	//downloadAnyFromServer
-	public List<IDataEntity> getAny(String pFnName, Type pOutType, FnParam... pParams)
+	// downloadAnyFromServer
+	public List<IDataEntity> getAny(String pFnName, Type pOutType, Pager pPager, FnParam... pParams)
 			throws IOException {
 
 		GsonBuilder gb = new GsonBuilder();
-		// gb.registerTypeAdapter(IElement.class, new ElementSerializer());
+		gb.registerTypeAdapter(IElement.class, new ElementSerializer());
 		gb.setFieldNamingPolicy(FieldNamingPolicy.IDENTITY);
 
 		Gson gson = gb.create();
 
 		FnParam[] params;
 		if (pParams != null && pParams.length > 0) {
-			params = new FnParam[pParams.length + 1];
+			params = new FnParam[pParams.length + 2];
 			for (int i = 0; i < pParams.length; i++) {
-				params[i + 1] = pParams[i];
+				params[i + 2] = pParams[i];
 			}
 		} else
-			params = new FnParam[1];
+			params = new FnParam[2];
 
 		params[0] = new FnParam(CLASS_NAME, getClassName(pOutType));
+		params[1] = new FnParam(PAGER, pPager);
 
 		String in = String.format(JSON_FORMAT, gson.toJson(params));
-		HttpURLConnection conn = getConnection(pFnName);
+		HttpURLConnection conn = getConnection(pFnName, HTTP_METHOD.GET);
 		// System.out.println("URL :" + conn.getURL().toString() + "/" + in);
 
 		OutputStream os = conn.getOutputStream();
@@ -198,29 +214,30 @@ public class JsonHandler<T> implements IHandler<T> {
 		return result;
 	}
 
-	//downloadFromServer
+	// downloadFromServer
 	public T getOne(String pFnName, FnParam... pParams) throws IOException {
 
 		GsonBuilder gb = new GsonBuilder();
-		// gb.registerTypeAdapter(IElement.class, new ElementSerializer());
+		gb.registerTypeAdapter(IElement.class, new ElementSerializer());
 		gb.setFieldNamingPolicy(FieldNamingPolicy.IDENTITY);
 
 		Gson gson = gb.create();
 
 		FnParam[] params;
 		if (pParams != null && pParams.length > 0) {
-			params = new FnParam[pParams.length + 1];
+			params = new FnParam[pParams.length + 2];
 			for (int i = 0; i < pParams.length; i++) {
-				params[i + 1] = pParams[i];
+				params[i + 2] = pParams[i];
 			}
 		} else
-			params = new FnParam[1];
+			params = new FnParam[2];
 
 		Class<T> entityType = getTypeParameterClass();
 		params[0] = new FnParam(CLASS_NAME, getClassName(entityType));
+		params[1] = new FnParam(PAGER, new Pager());
 
 		String in = String.format(JSON_FORMAT, gson.toJson(params));
-		HttpURLConnection conn = getConnection(pFnName);
+		HttpURLConnection conn = getConnection(pFnName, HTTP_METHOD.GET);
 		// System.out.println("URL :" + conn.getURL().toString() + "/" + in);
 		OutputStream os = conn.getOutputStream();
 		os.write(in.getBytes(StandardCharsets.UTF_8));
@@ -252,17 +269,17 @@ public class JsonHandler<T> implements IHandler<T> {
 		return (Class<T>) paramType.getActualTypeArguments()[0];
 	}
 
-	//downloadFromServer
+	// downloadFromServer
 	public T getOne(String pFnName, T params) throws IOException {
 
 		GsonBuilder gb = new GsonBuilder();
-		// gb.registerTypeAdapter(IElement.class, new ElementSerializer());
+		gb.registerTypeAdapter(IElement.class, new ElementSerializer());
 		gb.setFieldNamingPolicy(FieldNamingPolicy.IDENTITY);
 
 		Gson gson = gb.create();
 		// String in = gson.toJson(pIn);
 		String in = String.format(JSON_FORMAT, gson.toJson(params));
-		HttpURLConnection conn = getConnection(pFnName);
+		HttpURLConnection conn = getConnection(pFnName, HTTP_METHOD.POST);
 
 		OutputStream os = conn.getOutputStream();
 
@@ -289,29 +306,30 @@ public class JsonHandler<T> implements IHandler<T> {
 		return result;
 	}
 
-	//downloadFromServer
+	// downloadFromServer
 	public IDataEntity getOne(String pFnName, Type pOutType, FnParam... pParams) throws IOException {
 
 		GsonBuilder gb = new GsonBuilder();
-		// gb.registerTypeAdapter(IElement.class, new ElementSerializer());
+		gb.registerTypeAdapter(IElement.class, new ElementSerializer());
 		gb.setFieldNamingPolicy(FieldNamingPolicy.IDENTITY);
 
 		Gson gson = gb.create();
 
 		FnParam[] params;
 		if (pParams != null && pParams.length > 0) {
-			params = new FnParam[pParams.length + 1];
+			params = new FnParam[pParams.length + 2];
 			for (int i = 0; i < pParams.length; i++) {
-				params[i + 1] = pParams[i];
+				params[i + 2] = pParams[i];
 			}
 		} else
-			params = new FnParam[1];
+			params = new FnParam[2];
 
 		params[0] = new FnParam(CLASS_NAME, getClassName(pOutType));
+		params[1] = new FnParam(PAGER, new Pager());
 
 		String in = String.format(JSON_FORMAT, gson.toJson(params));
 
-		HttpURLConnection conn = getConnection(pFnName);
+		HttpURLConnection conn = getConnection(pFnName, HTTP_METHOD.GET);
 		OutputStream os = conn.getOutputStream();
 		os.write(in.getBytes(StandardCharsets.UTF_8));
 		os.flush();
@@ -334,17 +352,17 @@ public class JsonHandler<T> implements IHandler<T> {
 		return result;
 	}
 
-	//	executeAtServer
+	// executeAtServer
 	public IResult<List<T>> postList(String pFnName, List<T> params) throws IOException {
 
 		GsonBuilder gb = new GsonBuilder();
-		// gb.registerTypeAdapter(IElement.class, new ElementSerializer());
+		gb.registerTypeAdapter(IElement.class, new ElementSerializer());
 		gb.setFieldNamingPolicy(FieldNamingPolicy.IDENTITY);
 
 		Gson gson = gb.create();
 		String in = String.format(JSON_FORMAT, gson.toJson(params));
 
-		HttpURLConnection conn = getConnection(pFnName);
+		HttpURLConnection conn = getConnection(pFnName, HTTP_METHOD.POST);
 		OutputStream os = conn.getOutputStream();
 
 		os.write(in.getBytes(StandardCharsets.UTF_8));
@@ -381,14 +399,14 @@ public class JsonHandler<T> implements IHandler<T> {
 	public IResult<String> executeAtServer(String pFnName, FnParam[] params) throws IOException {
 
 		GsonBuilder gb = new GsonBuilder();
-		// gb.registerTypeAdapter(IElement.class, new ElementSerializer());
+		gb.registerTypeAdapter(IElement.class, new ElementSerializer());
 		gb.setFieldNamingPolicy(FieldNamingPolicy.IDENTITY);
 
 		Gson gson = gb.create();
 		// String in = gson.toJson(pIn);
 		String in = String.format(JSON_FORMAT, gson.toJson(params));
 
-		HttpURLConnection conn = getConnection(pFnName);
+		HttpURLConnection conn = getConnection(pFnName, HTTP_METHOD.POST);
 		OutputStream os = conn.getOutputStream();
 
 		os.write(in.getBytes(StandardCharsets.UTF_8));
@@ -415,7 +433,7 @@ public class JsonHandler<T> implements IHandler<T> {
 
 	public IResult<T> executeAtServer(String pFnName, Class<T> pOut, FnParam... pParams) throws IOException {
 		GsonBuilder gb = new GsonBuilder();
-		// gb.registerTypeAdapter(IElement.class, new ElementSerializer());
+		gb.registerTypeAdapter(IElement.class, new ElementSerializer());
 		gb.setFieldNamingPolicy(FieldNamingPolicy.IDENTITY);
 		Gson gson = gb.create();
 
@@ -431,7 +449,7 @@ public class JsonHandler<T> implements IHandler<T> {
 		params[0] = new FnParam(CLASS_NAME, getClassName(pOut));
 
 		String in = String.format(JSON_FORMAT, gson.toJson(params));
-		HttpURLConnection conn = getConnection(pFnName);
+		HttpURLConnection conn = getConnection(pFnName, HTTP_METHOD.POST);
 		OutputStream os = conn.getOutputStream();
 		os.write(in.getBytes(StandardCharsets.UTF_8));
 		os.close();
@@ -454,17 +472,17 @@ public class JsonHandler<T> implements IHandler<T> {
 		return result;
 	}
 
-	//executeAtServer
+	// executeAtServer
 	public IResult<T> postOne(String pFnName, T params) throws IOException {
 		GsonBuilder gb = new GsonBuilder();
-		// gb.registerTypeAdapter(IElement.class, new ElementSerializer());
+		gb.registerTypeAdapter(IElement.class, new ElementSerializer());
 		gb.setFieldNamingPolicy(FieldNamingPolicy.IDENTITY);
 
 		Gson gson = gb.create();
 		// String in = gson.toJson(pIn);
 		String in = String.format(JSON_FORMAT, gson.toJson(params));
 
-		HttpURLConnection conn = getConnection(pFnName);
+		HttpURLConnection conn = getConnection(pFnName, HTTP_METHOD.POST);
 		OutputStream os = conn.getOutputStream();
 		os.write(in.getBytes(StandardCharsets.UTF_8));
 		os.close();
@@ -489,17 +507,17 @@ public class JsonHandler<T> implements IHandler<T> {
 		return result;
 	}
 
-	//executeAtServer
+	// executeAtServer
 	public IResult<IDataEntity> postOne(String pFnName, IDataEntity params) throws IOException {
 		GsonBuilder gb = new GsonBuilder();
-		// gb.registerTypeAdapter(IElement.class, new ElementSerializer());
+		gb.registerTypeAdapter(IElement.class, new ElementSerializer());
 		gb.setFieldNamingPolicy(FieldNamingPolicy.IDENTITY);
 
 		Gson gson = gb.create();
 		// String in = gson.toJson(pIn);
 		String in = String.format(JSON_FORMAT, gson.toJson(params));
 
-		HttpURLConnection conn = getConnection(pFnName);
+		HttpURLConnection conn = getConnection(pFnName, HTTP_METHOD.POST);
 		OutputStream os = conn.getOutputStream();
 
 		os.write(in.getBytes(StandardCharsets.UTF_8));
@@ -526,14 +544,14 @@ public class JsonHandler<T> implements IHandler<T> {
 
 	public List<IDataEntity> uploadToServer(String pFnName, IDataEntity params, Type pOut) throws IOException {
 		GsonBuilder gb = new GsonBuilder();
-		// gb.registerTypeAdapter(IElement.class, new ElementSerializer());
+		gb.registerTypeAdapter(IElement.class, new ElementSerializer());
 		gb.setFieldNamingPolicy(FieldNamingPolicy.IDENTITY);
 
 		Gson gson = gb.create();
 		// String in = gson.toJson(pIn);
 		String in = String.format(JSON_FORMAT, gson.toJson(params));
 
-		HttpURLConnection conn = getConnection(pFnName);
+		HttpURLConnection conn = getConnection(pFnName, HTTP_METHOD.POST);
 		OutputStream os = conn.getOutputStream();
 
 		os.write(in.getBytes(StandardCharsets.UTF_8));
@@ -552,7 +570,7 @@ public class JsonHandler<T> implements IHandler<T> {
 	}
 
 	public String uploadToServer(String pFnName, String pData) throws IOException {
-		HttpURLConnection conn = getConnection(pFnName);
+		HttpURLConnection conn = getConnection(pFnName, HTTP_METHOD.POST);
 		OutputStream os = conn.getOutputStream();
 
 		os.write(pData.getBytes(StandardCharsets.UTF_8));
@@ -612,7 +630,7 @@ public class JsonHandler<T> implements IHandler<T> {
 		String dFnName = "findBy@" + pQuery.getName();
 		List<IDataEntity> list = null;
 		try {
-			list = getAny(dFnName, pOutType, pQuery.getParams());
+			list = getAny(dFnName, pOutType, pQuery.getPager(), pQuery.getParams());
 		} catch (IOException e) {
 			Logger.getLogger(MyLogger.NAME).log(Level.SEVERE, e.getMessage(), e);
 		}
@@ -624,7 +642,7 @@ public class JsonHandler<T> implements IHandler<T> {
 		String dFnName = "findBy@" + pQuery.getName();
 		List<T> list = null;
 		try {
-			list = getAny(dFnName, pQuery.getParams());
+			list = getAny(dFnName, pQuery.getPager(), pQuery.getParams());
 		} catch (IOException e) {
 			Logger.getLogger(MyLogger.NAME).log(Level.SEVERE, e.getMessage(), e);
 		}
