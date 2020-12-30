@@ -84,10 +84,9 @@ public class JsonHandler<T> implements IHandler<T> {
 		connection.setRequestProperty("enctype", "multipart/form-data");
 		connection.setRequestProperty("Accept-Encoding", "gzip");
 		connection.setRequestProperty(AUTHORIZATION, token);
+		connection.setRequestMethod(pHttpMethod.getMehod());
 		connection.setDoOutput(true);
 		connection.setDoInput(true);
-		connection.setRequestMethod(pHttpMethod.getMehod());
-
 		return connection;
 	}
 
