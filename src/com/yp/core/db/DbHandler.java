@@ -821,7 +821,7 @@ public class DbHandler<T> implements IHandler<T> {
 		clear();
 		if (pDataEntity.isNew() || pDataEntity.isUpdated())
 			for (Map.Entry<String, IElement> e : pDataEntity.getFields().entrySet()) {
-				if (e.getValue() != null && !e.getValue().isReadonly() && e.getValue().isChanged()) {
+				if (e.getValue() != null && !e.getValue().isReadOnly() && e.getValue().isChanged()) {
 					paramList.add(e.getKey());
 					valueList.add(e.getValue().getValue());
 					fieldCount += 1;

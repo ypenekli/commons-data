@@ -112,10 +112,10 @@ public class DataEntity implements IDataEntity {
 	public void setFieldReadonly(String pFieldName, boolean pReadonly) {
 		String key = pFieldName.toLowerCase(Locale.US);
 		if (fields.containsKey(key)) {
-			fields.get(key).setReadonly(pReadonly);
+			fields.get(key).setReadOnly(pReadonly);
 		}
 		if (primaryKeys.containsKey(key)) {
-			primaryKeys.get(key).setReadonly(pReadonly);
+			primaryKeys.get(key).setReadOnly(pReadonly);
 		}
 	}
 

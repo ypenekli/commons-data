@@ -18,9 +18,9 @@ public interface IElement extends Serializable {
 
 	void setTypeName(String pTypeName);
 
-	boolean isReadonly();
+	boolean isReadOnly();
 
-	void setReadonly(boolean pReadonly);
+	void setReadOnly(boolean pReadonly);
 
 	void accept();
 }

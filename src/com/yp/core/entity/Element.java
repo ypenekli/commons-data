@@ -6,14 +6,14 @@ public class Element implements IElement {
 	private Object value;
 	private boolean changed;
 	private String typeName;
-	private boolean readonly;
+	private boolean readOnly;
 
 	public Element() {
 		super();
 		value = null;
 		changed = false;
 		typeName = "";
-		readonly = false;
+		readOnly = false;
 	}
 
 	public Element(Object pValue) {
@@ -21,7 +21,7 @@ public class Element implements IElement {
 		value = pValue;
 		changed = false;
 		typeName = "";
-		readonly = false;
+		readOnly = false;
 	}
 
 	public Element(String pValue, Boolean pChanged) {
@@ -68,13 +68,13 @@ public class Element implements IElement {
 	}
 
 	@Override
-	public boolean isReadonly() {
-		return readonly;
+	public boolean isReadOnly() {
+		return readOnly;
 	}
 
 	@Override
-	public void setReadonly(boolean pReadonly) {
-		readonly = pReadonly;
+	public void setReadOnly(boolean pReadonly) {
+		readOnly = pReadonly;
 	}
 
 	@Override
