@@ -36,7 +36,7 @@ public class BaseConstants {
 	private BaseConstants() {
 	}
 
-	private static final String config_url = "/core/config/Config.properties";	
+	private static final String config_url = "/core/config/Config.properties";
 	public static final ResourceBundle BUNDLE_MESSAGE = ResourceBundle.getBundle("core.config.Messages");
 
 	public static final int ERRORCODE_CONNECTION = 10000;
@@ -257,11 +257,9 @@ public class BaseConstants {
 	}
 
 	public static void saveConfig() {
-		try {
-			final File f1 = new File(String.valueOf(getRootAddress()) + BaseConstants.SLASH_OS + "Config.xml");
-			final FileOutputStream fo = new FileOutputStream(f1);
+		final File f1 = new File(String.valueOf(getRootAddress()) + BaseConstants.SLASH_OS + "Config.xml");
+		try (final FileOutputStream fo = new FileOutputStream(f1)) {
 			BaseConstants.config.storeToXML(fo, null);
-			fo.close();
 		} catch (FileNotFoundException e) {
 			Logger.getLogger(MyLogger.NAME).log(Level.SEVERE, e.getMessage(), e);
 		} catch (IOException e2) {
