@@ -10,10 +10,10 @@ public interface IReference<T> extends IDataEntity{
 
 	String getValue();
 
-	void setValue(String pDefinition);
+	void setValue(String pValue);
 
 	String getDescription();
 
-	void setDescription(String pExtra);
+	void setDescription(String pDescription);
 
 }
